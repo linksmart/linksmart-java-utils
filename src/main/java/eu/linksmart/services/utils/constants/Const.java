@@ -1,8 +1,7 @@
-package eu.linksmart.gc.utils.constants;
+package eu.linksmart.services.utils.constants;
 
-import eu.linksmart.gc.utils.configuration.ConfigurationConst;
-import eu.linksmart.gc.utils.logging.LoggerServiceConst;
-import eu.linksmart.gc.utils.mqtt.broker.BrokerServiceConst;
+import eu.linksmart.services.utils.logging.LoggerServiceConst;
+import eu.linksmart.services.utils.mqtt.broker.BrokerServiceConst;
 
 /**
  * Created by José Ángel Carvajal on 06.08.2015 a researcher of Fraunhofer FIT.

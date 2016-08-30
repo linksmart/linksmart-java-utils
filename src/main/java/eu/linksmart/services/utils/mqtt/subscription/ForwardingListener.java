@@ -1,9 +1,9 @@
-package eu.linksmart.gc.utils.mqtt.subscription;
+package eu.linksmart.services.utils.mqtt.subscription;
 
 
-import eu.linksmart.gc.utils.mqtt.types.CurrentStatus;
-import eu.linksmart.gc.utils.mqtt.types.MqttMessage;
-import eu.linksmart.gc.utils.mqtt.types.Topic;
+import eu.linksmart.services.utils.mqtt.types.CurrentStatus;
+import eu.linksmart.services.utils.mqtt.types.MqttMessage;
+import eu.linksmart.services.utils.mqtt.types.Topic;
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -11,8 +11,6 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by José Ángel Carvajal on 06.08.2015 a researcher of Fraunhofer FIT.

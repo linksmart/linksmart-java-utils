@@ -1,6 +1,6 @@
-package eu.linksmart.gc.utils.mqtt.broker;
+package eu.linksmart.services.utils.mqtt.broker;
 
-import eu.linksmart.gc.utils.mqtt.types.Topic;
+import eu.linksmart.services.utils.mqtt.types.Topic;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.net.MalformedURLException;

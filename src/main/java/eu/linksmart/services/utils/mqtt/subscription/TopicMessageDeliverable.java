@@ -1,6 +1,6 @@
-package eu.linksmart.gc.utils.mqtt.subscription;
+package eu.linksmart.services.utils.mqtt.subscription;
 
-import eu.linksmart.gc.utils.mqtt.types.MqttMessage;
+import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,7 +1,6 @@
-package eu.linksmart.gc.utils.mqtt.broker;
+package eu.linksmart.services.utils.mqtt.broker;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.slf4j.LoggerFactory;
 
 import java.util.Observable;
 import java.util.Observer;

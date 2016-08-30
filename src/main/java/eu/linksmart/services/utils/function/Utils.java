@@ -1,7 +1,7 @@
-package eu.linksmart.gc.utils.function;
+package eu.linksmart.services.utils.function;
 
-import eu.linksmart.gc.utils.configuration.Configurator;
-import eu.linksmart.gc.utils.constants.Const;
+import eu.linksmart.services.utils.configuration.Configurator;
+import eu.linksmart.services.utils.constants.Const;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

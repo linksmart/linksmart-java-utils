@@ -1,14 +1,4 @@
-package eu.linksmart.gc.utils.logging;
-
-import eu.linksmart.gc.utils.configuration.Configurator;
-import eu.linksmart.gc.utils.constants.Const;
-import eu.linksmart.gc.utils.function.Utils;
-import eu.linksmart.gc.utils.mqtt.broker.StaticBroker;
-import eu.linksmart.gc.utils.mqtt.broker.StaticBrokerService;
-
-
-import java.util.Hashtable;
-import java.util.Map;
+package eu.linksmart.services.utils.logging;
 
 /**
  * Created by José Ángel Carvajal on 07.08.2015 a researcher of Fraunhofer FIT.

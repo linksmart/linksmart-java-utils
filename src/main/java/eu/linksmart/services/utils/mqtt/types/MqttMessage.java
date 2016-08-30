@@ -1,4 +1,4 @@
-package eu.linksmart.gc.utils.mqtt.types;
+package eu.linksmart.services.utils.mqtt.types;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package eu.linksmart.gc.utils.mqtt.broker;
+package eu.linksmart.services.utils.mqtt.broker;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 

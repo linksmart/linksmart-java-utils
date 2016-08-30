@@ -1,17 +1,13 @@
-package eu.linksmart.gc.utils.configuration;
+package eu.linksmart.services.utils.configuration;
 
 
-import eu.linksmart.gc.utils.function.Utils;
+import eu.linksmart.services.utils.function.Utils;
 import org.apache.commons.configuration.*;
 
-import javax.naming.ConfigurationException;
 import java.io.File;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by José Ángel Carvajal on 06.08.2015 a researcher of Fraunhofer FIT.
@@ -23,7 +19,7 @@ public class Configurator extends  CompositeConfiguration {
     static public Configurator getDefaultConfig(){
 
 
-        ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> confFile != null).filter(confFile -> !ConfigurationConst.DEFAULT_INTERN_CONFIGURATION_FILE.equals(confFile)).forEach(confFile -> {
+        ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> confFile != null).filter(confFile -> !ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE.equals(confFile)).forEach(confFile -> {
 
             def.addConfiguration(new Configurator(confFile));
         });
@@ -40,14 +36,15 @@ public class Configurator extends  CompositeConfiguration {
         Configurator configurator = new Configurator();
 
 
-        ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> !ConfigurationConst.DEFAULT_INTERN_CONFIGURATION_FILE.equals(confFile)).filter(confFile -> confFile != null).forEach(confFile -> configurator.addConfiguration(new Configurator(confFile)));
+        ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> !ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE.equals(confFile)).filter(confFile -> confFile != null).forEach(confFile -> configurator.addConfiguration(new Configurator(confFile)));
+
 
 
         return configurator;
 
     }
     protected Configurator() {
-        this(ConfigurationConst.DEFAULT_INTERN_CONFIGURATION_FILE);
+        this(ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE);
 
     }
     protected Configurator(String configurationFile) {

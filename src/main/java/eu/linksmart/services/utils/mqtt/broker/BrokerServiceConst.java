@@ -1,4 +1,4 @@
-package eu.linksmart.gc.utils.mqtt.broker;
+package eu.linksmart.services.utils.mqtt.broker;
 
 /**
  * Created by José Ángel Carvajal on 06.08.2015 a researcher of Fraunhofer FIT.
