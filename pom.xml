@@ -1,76 +1,184 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <parent>
-        <groupId>eu.linksmart.services.events</groupId>
-        <artifactId>parent</artifactId>
-        <version>1.7.1-SNAPSHOT</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <groupId>eu.linksmart.commons</groupId>
+    <version>1.0.0-SNAPSHOT</version>
     <artifactId>utils</artifactId>
     <name>Several Utils</name>
     <packaging>jar</packaging>
+    <developers>
+        <developer>
+            <id>jacarvajal</id>
+            <email>jose.angel.angel.carvajal&lt;at&gt;fit.fraunhofer.de</email>
+            <name>Jose Angel Carvajal Soto</name>
+            <roles>
+                <role>Developer</role>
+                <role>Researcher</role>
+            </roles>
+            <organization>Fraunhofer FIT</organization>
+            <organizationUrl>http://www.fit.fraunhofer.de/</organizationUrl>
+            <url>http://www.fit.fraunhofer.de/</url>
+        </developer>
+        <developer>
+            <id>tavakoli</id>
+            <email>farshid.tavakolizadeh@fit.fraunhofer.de</email>
+            <name>Farshid Tavakolizadeh</name>
+            <roles>
+                <role>Developer</role>
+                <role>Researcher</role>
+            </roles>
+            <organization>Fraunhofer FIT</organization>
+            <organizationUrl>http://www.fit.fraunhofer.de/</organizationUrl>
+            <url>http://www.fit.fraunhofer.de/</url>
+        </developer>
+        <developer>
+            <id>devasya</id>
+            <email>shreekantha.devasya@fit.fraunhofer.de</email>
+            <name>Shreekantha Devasya</name>
+            <roles>
+                <role>Developer</role>
+                <role>Researcher</role>
+            </roles>
+            <organization>Fraunhofer FIT</organization>
+            <organizationUrl>http://www.fit.fraunhofer.de/</organizationUrl>
+            <url>http://www.fit.fraunhofer.de/</url>
+        </developer>
+    </developers>
 
 
+
+    <organization>
+        <name>Fraunhofer FIT Institute</name>
+        <url>http://www.fit.fraunhofer.de</url>
+    </organization>
+    <distributionManagement>
+
+        <repository>
+            <id>releases</id>
+            <name>Releases</name>
+            <url>https://nexus.linksmart.eu/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Snapshots</name>
+            <url>https://nexus.linksmart.eu/repository/maven-snapshots/</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+        <!--    <site>
+                <id>agents</id>
+                <name>linksmart-service-agents-repository</name>
+                <url>dav:https://nexus.linksmart.eu/repository/iot-agents-site/</url>
+            </site>-->
+    </distributionManagement>
+    <ciManagement>
+        <system>Pipelines</system>
+        <url>https://pipelines.linksmart.eu</url>
+        <notifiers>
+            <notifier>
+                <type>mail</type>
+                <address>angel.carvajal@fit.fraunhofer.de</address>
+            </notifier>
+        </notifiers>
+    </ciManagement>
+    <issueManagement>
+        <system>Jira</system>
+        <url>https://boards.linksmart.eu</url>
+    </issueManagement>
+    <scm>
+        <connection>scm:git:https://pipelies@code.linksmart.eu/scm/com/java-utils.git</connection>
+        <developerConnection>scm:git:https://pipelines@code.linksmart.eu/scm/com/java-utils.gi</developerConnection>
+        <url>scm:git:https://pipelines@code.linksmart.eu/scm/com/java-utils.gi</url>
+        <tag>HEAD</tag>
+    </scm>
+    <properties>
+        <eclipse.paho.mqtt.version>1.1.0</eclipse.paho.mqtt.version>
+        <apache.commons.configuration2.version>2.2</apache.commons.configuration2.version>
+        <apache.commons.beanutils.version>1.9.3</apache.commons.beanutils.version>
+        <apache.commons.lang.version>3.1</apache.commons.lang.version>
+        <slf4j.version>1.7.21</slf4j.version>
+        <log4j.version>1.2.17</log4j.version>
+        <jackson.maper.asl.version>1.9.13</jackson.maper.asl.version>
+        <jackson.core.version>2.7.1</jackson.core.version>
+        <jackson.geojeson.version>1.6</jackson.geojeson.version>
+        <java.junit.version>4.12</java.junit.version>
+        <jjwt.version>3.2.0</jjwt.version>
+        <java.version>1.8</java.version>
+        <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
+        <maven.source.version>2.2.1</maven.source.version>
+        <ls.se.agents.version>1.7.1-SNAPSHOT</ls.se.agents.version>
+    </properties>
     <dependencies>
         <dependency>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <groupId>org.eclipse.paho</groupId>
+            <version>${eclipse.paho.mqtt.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-configuration2</artifactId>
+            <version>${apache.commons.configuration2.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
+            <version>${apache.commons.beanutils.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+            <version>${apache.commons.lang.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
+            <version>${jackson.maper.asl.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>${jackson.core.version}</version>
         </dependency>
         <dependency>
             <groupId>de.grundid.opendatalab</groupId>
             <artifactId>geojson-jackson</artifactId>
+            <version>${jackson.geojeson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
+            <version>${jackson.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.core.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.linksmart.services.events.testing</groupId>
             <artifactId>tools</artifactId>
+            <version>${ls.se.agents.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+            <version>${java.junit.version}</version>
         </dependency>
         <dependency>
             <groupId>com.auth0</groupId>
@@ -92,6 +200,34 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
-    </build>
 
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+
+            <!-- build sources  -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven.source.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
 </project>
