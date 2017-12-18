@@ -105,7 +105,8 @@
         <java.version>1.8</java.version>
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
         <maven.source.version>2.2.1</maven.source.version>
-        <ls.se.agents.version>1.7.1-SNAPSHOT</ls.se.agents.version>
+        <nimbus.jose.jwt>5.1</nimbus.jose.jwt>
+        <ls.se.agents.version>0.0.0</ls.se.agents.version>
     </properties>
     <dependencies>
         <dependency>
@@ -169,11 +170,7 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.core.version}</version>
         </dependency>
-        <dependency>
-            <groupId>eu.linksmart.services.events.testing</groupId>
-            <artifactId>tools</artifactId>
-            <version>${ls.se.agents.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -189,7 +186,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>5.1</version>
+            <version>${nimbus.jose.jwt}</version>
         </dependency>
     </dependencies>
 
