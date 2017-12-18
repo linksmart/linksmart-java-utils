@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.linksmart.commons</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <artifactId>utils</artifactId>
     <name>Several Utils</name>
     <packaging>jar</packaging>
@@ -88,7 +88,7 @@
         <connection>scm:git:https://pipelies@code.linksmart.eu/scm/com/java-utils.git</connection>
         <developerConnection>scm:git:https://pipelines@code.linksmart.eu/scm/com/java-utils.git</developerConnection>
         <url>scm:git:https://pipelines@code.linksmart.eu/scm/com/java-utils.git</url>
-        <tag>HEAD</tag>
+        <tag>v1.0.0</tag>
     </scm>
     <properties>
         <eclipse.paho.mqtt.version>1.1.0</eclipse.paho.mqtt.version>
