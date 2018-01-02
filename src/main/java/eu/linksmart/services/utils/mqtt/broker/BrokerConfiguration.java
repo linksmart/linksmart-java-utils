@@ -3,6 +3,7 @@ package eu.linksmart.services.utils.mqtt.broker;
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
 import eu.linksmart.services.utils.function.Utils;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -187,12 +188,12 @@ public class BrokerConfiguration {
             return conf.getInt(key);
         return Default;
     }
-    static public MqttClient initClient(BrokerConfiguration brokerConf) throws MqttException {
-        MqttClient mqttClient;
+    static public MqttAsyncClient initClient(BrokerConfiguration brokerConf) throws MqttException {
+        MqttAsyncClient mqttClient;
         if (brokerConf.filePersistence)
-            mqttClient = new MqttClient(Broker.getBrokerURL(brokerConf.getHostname(),brokerConf.getPort()),brokerConf.getId(),new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir")));
+            mqttClient = new MqttAsyncClient(Broker.getBrokerURL(brokerConf.getHostname(),brokerConf.getPort()),brokerConf.getId(),new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir")));
         else
-            mqttClient = new MqttClient(Broker.getBrokerURL(brokerConf.getHostname(),brokerConf.getPort()),brokerConf.getId(),new MemoryPersistence());
+            mqttClient = new MqttAsyncClient(Broker.getBrokerURL(brokerConf.getHostname(),brokerConf.getPort()),brokerConf.getId(),new MemoryPersistence());
 
         //mqttClient.connect(initMqttOptions(brokerConf));
 
@@ -209,7 +210,7 @@ public class BrokerConfiguration {
         this.id =ID;
         loadConfiguration(alias, this);
     }
-    public MqttClient initClient() throws MqttException {
+    public MqttAsyncClient initClient() throws MqttException {
         return initClient(this);
     }
     public BrokerSecurityConfiguration getInitSecurityConfiguration(){

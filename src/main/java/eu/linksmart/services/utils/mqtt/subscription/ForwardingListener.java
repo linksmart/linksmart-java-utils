@@ -37,37 +37,6 @@ public  class ForwardingListener implements MqttCallback {
     private final MessageValidator validator;
     //End of code made for testing performance
 
-    /*public ForwardingListener(String listening, Observer mqttEventsListener, UUID originProtocol) {
-        this.originProtocol = originProtocol;
-
-        /// Code for validation and test proposes
-        if(VALIDATION_MODE = Configurator.getDefaultConfig().containsKey(Const.VALIDATION_FORWARDING)) {
-            deserializer = new DefaultDeserializer();
-            validator = new MessageValidator(this.getClass(),"0",Configurator.getDefaultConfig().getLong(Const.VALIDATION_LOT_SIZE));
-        }else{
-            deserializer = null;
-            validator = null;
-        }
-
-        initObserver(listening, mqttEventsListener);
-
-    }
-
-    public ForwardingListener(String listening, Observer connectionListener, Observer mqttEventsListener, UUID originProtocol) {
-        this.originProtocol = originProtocol;
-        this.connectionListener = connectionListener;
-
-        /// Code for validation and test proposes
-        if(VALIDATION_MODE = Configurator.getDefaultConfig().containsKey(Const.VALIDATION_FORWARDING)) {
-            deserializer = new DefaultDeserializer();
-            validator = new MessageValidator(this.getClass(),"0",Configurator.getDefaultConfig().getLong(Const.VALIDATION_LOT_SIZE));
-        }else{
-            deserializer = null;
-            validator = null;
-        }
-
-        initObserver(listening, mqttEventsListener);
-    }*/
     public ForwardingListener( Observer connectionListener, UUID originProtocol) {
         this.originProtocol = originProtocol;
         this.connectionListener = connectionListener;
@@ -130,7 +99,6 @@ public  class ForwardingListener implements MqttCallback {
         LOG.warn("Connection lost: "+throwable.getMessage(),throwable);
         connectionListener.update(null, this);
 
-
     }
 
 
@@ -162,7 +130,6 @@ public  class ForwardingListener implements MqttCallback {
 
             processed = true;
         }
-
 
         if(!processed)
             LOG.warn("A message arrived and no one listening to it");

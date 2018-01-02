@@ -16,79 +16,80 @@ public interface Broker extends Observer{
 
 
 
-    public boolean isConnected() ;
-    public void connect() throws Exception ;
-    public void disconnect() throws Exception ;
-    public void destroy() throws Exception;
-    public String getBrokerURL();
+    boolean isConnected() ;
+    void connect() throws Exception ;
+    void disconnect() throws Exception ;
+    void destroy() throws Exception;
+    String getBrokerURL();
 
-    public void createClient() throws MqttException;
+    void createClient() throws MqttException;
 
     //public boolean isWatchdog() ;
 
-    public void startWatchdog() ;
-    public void stopWatchdog();
 
-    public void publish(String topic, byte[] payload, int qos, boolean retained) throws Exception;
-    public void publish(String topic, byte[] payload) throws Exception ;
-    public void publish(String topic, String payload) throws Exception;
 
-    public String getBrokerName();
+    void publish(String topic, byte[] payload, int qos, boolean retained) throws Exception;
+    void publish(String topic, byte[] payload) throws Exception ;
+    void publish(String topic, String payload) throws Exception;
 
-    public void setBrokerName(String brokerName) throws Exception ;
+    String getBrokerName();
 
-    public String getBrokerPort();
+    void setBrokerName(String brokerName) throws Exception ;
 
-    public void setBrokerPort(String brokerPort) throws Exception ;
-    public void setBroker(String brokerName, String brokerPort) throws Exception;
+    String getBrokerPort();
 
-    public  boolean addListener(String topic, Observer stakeholder);
-    public  boolean addListener(String topic, Observer stakeholder, int QoS);
+    void setBrokerPort(String brokerPort) throws Exception ;
+    void setBroker(String brokerName, String brokerPort) throws Exception;
 
-    default public  boolean addListener(String topic, MqttMessageObserver stakeholder){
+    boolean addListener(String topic, Observer stakeholder);
+    boolean addListener(String topic, Observer stakeholder, int QoS);
+
+    void addConnectionListener(Observer listener);
+
+    default boolean addListener(String topic, MqttMessageObserver stakeholder){
       return addListener(topic,(Observer)stakeholder);
     }
 
-    default public  boolean addListener(String topic, MqttMessageObserver stakeholder, int QoS){
+    default boolean addListener(String topic, MqttMessageObserver stakeholder, int QoS){
         return addListener(topic,(Observer)stakeholder,QoS);
     }
 
-    public  boolean removeListener(String topic, Observer stakeholder);
-    public  void removeListener( Observer stakeholder);
-    public BrokerConfiguration getConfiguration();
+    boolean removeListener(String topic, Observer stakeholder);
+    void removeListener( Observer stakeholder);
+    BrokerConfiguration getConfiguration();
 
-    public String getAlias();
+    String getAlias();
 
     @Override
-    public void update(Observable o, Object arg) ;
+    void update(Observable o, Object arg) ;
 
-    public static String getBrokerURL(String brokerName, String brokerPort){
+    static String getBrokerURL(String brokerName, String brokerPort){
 
         if (ipPattern.matcher(brokerName).find())
             return "tcp://"+brokerName+":"+brokerPort;
         else
             return "tcp://"+brokerName+":"+brokerPort;
     }
-    public static String getSecureBrokerURL(String brokerName, String brokerPort){
+    static String getSecureBrokerURL(String brokerName, String brokerPort){
 
         if (ipPattern.matcher(brokerName).find())
             return "ssl://"+brokerName+":"+brokerPort;
         else
             return "ssl://"+brokerName+":"+brokerPort;
     }
-    public static String getBrokerURL(String brokerName, int brokerPort){
+    static String getBrokerURL(String brokerName, int brokerPort){
         return getBrokerURL(brokerName,String.valueOf(brokerPort));
     }
-    public static String getSecureBrokerURL(String brokerName, int brokerPort){
+    static String getSecureBrokerURL(String brokerName, int brokerPort){
         return getSecureBrokerURL(brokerName, String.valueOf(brokerPort));
     }
-    public static String getBrokerURL(String brokerName, String brokerPort, boolean isSSL_URL){
+    static String getBrokerURL(String brokerName, String brokerPort, boolean isSSL_URL){
         if (isSSL_URL)
             return getSecureBrokerURL(brokerName,brokerPort);
         else
             return getBrokerURL(brokerName, brokerPort);
     }
-    public static boolean isBrokerURL(String string){
+    static boolean isBrokerURL(String string){
         return  urlPattern.matcher(string).find();
 
     }

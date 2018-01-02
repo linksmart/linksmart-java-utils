@@ -85,23 +85,6 @@ public class StaticBroker implements Broker{
 
     }
 
-    //@Override
-    public boolean isWatchdog() {
-        return brokerService.isWatchdog();
-    }
-
-    @Override
-    public void startWatchdog() {
-
-        brokerService.startWatchdog();
-    }
-
-    @Override
-    public void stopWatchdog() {
-        brokerService.stopWatchdog();
-
-    }
-
     @Override
     public void publish(String topic, byte[] payload, int qos, boolean retained) throws Exception {
 
@@ -161,6 +144,12 @@ public class StaticBroker implements Broker{
 
         return brokerService.addListener(topic,stakeholder,QoS);
     }
+
+    @Override
+    public void addConnectionListener(Observer listener) {
+        brokerService.addConnectionListener(listener);
+    }
+
     private void topicObserversManagement(String topic, Observer stakeholder){
         Topic t = new Topic(topic);
         if(!observersByTopic.containsKey(t))

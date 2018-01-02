@@ -64,7 +64,6 @@ public class TopicMessageDeliverable implements Runnable{
             loggerService.warn("the same observer was intent to be added in the same Message");
     }
 
-
     @Override
     public void run() {
         MqttMessage message=null;
@@ -107,6 +106,7 @@ public class TopicMessageDeliverable implements Runnable{
     public synchronized int countObservers() {
         return observers.size();
     }
+
     public synchronized void addMessage(MqttMessage mqttMessage){
 
         mqttMessages.add(mqttMessage);
