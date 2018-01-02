@@ -188,12 +188,12 @@ public class BrokerConfiguration {
             return conf.getInt(key);
         return Default;
     }
-    static public MqttAsyncClient initClient(BrokerConfiguration brokerConf) throws MqttException {
-        MqttAsyncClient mqttClient;
+    static public MqttClient initClient(BrokerConfiguration brokerConf) throws MqttException {
+        MqttClient mqttClient;
         if (brokerConf.filePersistence)
-            mqttClient = new MqttAsyncClient(Broker.getBrokerURL(brokerConf.getHostname(),brokerConf.getPort()),brokerConf.getId(),new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir")));
+            mqttClient = new MqttClient(Broker.getBrokerURL(brokerConf.getHostname(),brokerConf.getPort()),brokerConf.getId(),new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir")));
         else
-            mqttClient = new MqttAsyncClient(Broker.getBrokerURL(brokerConf.getHostname(),brokerConf.getPort()),brokerConf.getId(),new MemoryPersistence());
+            mqttClient = new MqttClient(Broker.getBrokerURL(brokerConf.getHostname(),brokerConf.getPort()),brokerConf.getId(),new MemoryPersistence());
 
         //mqttClient.connect(initMqttOptions(brokerConf));
 
@@ -210,7 +210,7 @@ public class BrokerConfiguration {
         this.id =ID;
         loadConfiguration(alias, this);
     }
-    public MqttAsyncClient initClient() throws MqttException {
+    public MqttClient initClient() throws MqttException {
         return initClient(this);
     }
     public BrokerSecurityConfiguration getInitSecurityConfiguration(){

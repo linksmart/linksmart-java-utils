@@ -15,7 +15,7 @@ public class BrokerService implements Observer, Broker {
     protected transient static Logger loggerService = Logger.getLogger(BrokerService.class.getName());
     // this is the MQTT client to broker in the local broker
     private transient Configurator conf = Configurator.getDefaultConfig();
-    protected transient MqttAsyncClient mqttClient;
+    protected transient MqttClient mqttClient;
     protected transient ForwardingListener listener;
     protected transient List<Observer> connectionListener = new ArrayList<>();
 
