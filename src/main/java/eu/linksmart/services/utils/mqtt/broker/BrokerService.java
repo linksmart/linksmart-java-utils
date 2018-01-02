@@ -50,7 +50,7 @@ public class BrokerService implements Observer, Broker {
 
         return mqttClient.isConnected();
     }
-    protected void _connect() throws Exception {
+    protected synchronized void _connect() throws Exception {
 
         if(!mqttClient.isConnected()) {
             loggerService.info("MQTT broker UUID:"+brokerConf.getId()+" Alias:"+brokerConf.getAlias()+" with configuration "+brokerConf.toString()+" is connecting...");
@@ -59,7 +59,7 @@ public class BrokerService implements Observer, Broker {
             loggerService.info("MQTT broker UUID:"+brokerConf.getId()+" Alias:"+brokerConf.getAlias()+" is connected");
         }
     }
-    protected void _disconnect() throws Exception {
+    protected synchronized void _disconnect() throws Exception {
         loggerService.info("MQTT broker UUID:"+brokerConf.getId()+" Alias:"+brokerConf.getAlias()+" with configuration "+brokerConf.toString()+" is disconnecting...");
         try {
 
@@ -126,7 +126,6 @@ public class BrokerService implements Observer, Broker {
 
     }
     public void publish(String topic, byte[] payload) throws Exception {
-
 
         publish(
                 topic,
