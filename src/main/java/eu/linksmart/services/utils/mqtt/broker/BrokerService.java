@@ -36,16 +36,7 @@ public class BrokerService implements Observer, Broker {
         createClient();
 
     }
-    public BrokerService(String brokerName, String brokerPort, UUID ID) throws MqttException {
 
-        brokerConf = new BrokerConfiguration("",ID.toString());
-        brokerConf.setHostname(brokerName);
-        brokerConf.setPort(Integer.valueOf(brokerPort));
-        listener = new ForwardingListener(this,ID);
-
-        createClient();
-
-    }
     public boolean isConnected()  {
 
         return mqttClient.isConnected();
@@ -156,6 +147,11 @@ public class BrokerService implements Observer, Broker {
 
     public String getBrokerPort() {
         return String.valueOf(brokerConf.getPort());
+    }
+
+    @Override
+    public boolean hasListeners() {
+        return listener.hasObservers();
     }
 
     public void setBrokerPort(String brokerPort) throws Exception {

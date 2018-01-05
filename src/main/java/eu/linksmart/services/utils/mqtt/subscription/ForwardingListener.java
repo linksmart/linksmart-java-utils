@@ -154,4 +154,7 @@ public  class ForwardingListener implements MqttCallback {
     }
 
 
+    public boolean hasObservers() {
+        return !observables.isEmpty();
+    }
 }

@@ -38,6 +38,8 @@ public interface Broker extends Observer{
 
     String getBrokerPort();
 
+    boolean hasListeners();
+
     void setBrokerPort(String brokerPort) throws Exception ;
     void setBroker(String brokerName, String brokerPort) throws Exception;
 

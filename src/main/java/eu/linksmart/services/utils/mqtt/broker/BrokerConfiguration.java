@@ -1,9 +1,9 @@
 package eu.linksmart.services.utils.mqtt.broker;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
 import eu.linksmart.services.utils.function.Utils;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -12,7 +12,8 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
 import javax.net.ssl.SSLSocketFactory;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by José Ángel Carvajal on 23.09.2016 a researcher of Fraunhofer FIT.
@@ -62,20 +63,26 @@ public class BrokerConfiguration {
     private String user = null;
     // password of the user (above) for connecting to the broker
     private String password = null;
-
+    static private boolean loaded =false;
+    @JsonIgnore
     private transient MqttConnectOptions mqttOptions = null;
+    @JsonIgnore
     private transient static Configurator conf = Configurator.getDefaultConfig();
+    @JsonIgnore
+    private transient static final ConcurrentMap<String, BrokerConfiguration> aliasBrokerConf = new ConcurrentHashMap<>();
 
 
     public static Map<String,BrokerConfiguration> loadConfigurations() throws UnknownError{
         try {
-            List aux = conf.getList(Const.BROKERS_ALIAS);
-            List<String> aliases = new ArrayList<>();
-            aliases.addAll(aux);
-
-            Map<String,BrokerConfiguration> configurations = aliases.stream().collect(Collectors.toMap(i->i, BrokerConfiguration::loadConfiguration));
-
-            return configurations;
+            if(!loaded) {
+                List aux = conf.getList(Const.BROKERS_ALIAS);
+                List<String> aliases = new ArrayList<>();
+                aliases.addAll(aux);
+                if (aliasBrokerConf.isEmpty() || !aliasBrokerConf.keySet().containsAll(aliases))
+                    aliases.forEach(i -> aliasBrokerConf.putIfAbsent(i, loadConfiguration(i)));
+                loaded=true;
+            }
+            return aliasBrokerConf;
         }catch (Exception e){
             throw new UnknownError(e.getMessage());
         }
@@ -83,6 +90,12 @@ public class BrokerConfiguration {
 
     }
 
+    static public void put(String alias,BrokerConfiguration brokerConfiguration){
+        aliasBrokerConf.putIfAbsent(alias,brokerConfiguration);
+    }
+    static public boolean contains(String alias){
+        return aliasBrokerConf.containsKey(alias);
+    }
     static public BrokerConfiguration loadConfiguration(String alias){
        BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
 
@@ -98,7 +111,7 @@ public class BrokerConfiguration {
             mqttOptions.setMqttVersion(brokerConf.version.ordinal());
             mqttOptions.setAutomaticReconnect(brokerConf.automaticReconnect);
             mqttOptions.setCleanSession(brokerConf.cleanSession);
-            if(brokerConf.user!=null) {
+            if(brokerConf.user!=null ) {
                 mqttOptions.setUserName(brokerConf.user);
                 mqttOptions.setPassword(brokerConf.password.toCharArray());
             }
@@ -108,7 +121,7 @@ public class BrokerConfiguration {
 
           //  mqttOptions.setServerURIs();
           //  mqttOptions.setSSLProperties();
-            if(brokerConf.secConf!=null) {
+            if(brokerConf.secConf!=null && !"".equals(brokerConf.secConf.CApath) && !"".equals(brokerConf.secConf.clientCertificatePath) && !"".equals(brokerConf.secConf.keyPath) ) {
                 SSLSocketFactory socketFactory;
                 try {
                     socketFactory = Utils.getSocketFactory(brokerConf.secConf.CApath, brokerConf.secConf.clientCertificatePath,brokerConf.secConf.keyPath, brokerConf.secConf.CAPassword,brokerConf.secConf.clientCertificatePassword,brokerConf.secConf.keyPassword);
@@ -127,9 +140,15 @@ public class BrokerConfiguration {
     }
     static protected BrokerConfiguration loadConfiguration(String alias, BrokerConfiguration brokerConf){
         try {
+            if(aliasBrokerConf.containsKey(alias))
+                return (brokerConf = aliasBrokerConf.get(alias));
+
+
             String aux = "".equals(alias)|| alias==null ? "":"_" + alias;
 
+            brokerConf = aliasBrokerConf.getOrDefault(alias,brokerConf);
 
+            brokerConf.alias=alias;
             brokerConf.hostname = getString(Const.DEFAULT_HOSTNAME, aux,brokerConf.hostname);
             brokerConf.port = getInt(Const.DEFAULT_PORT, aux, brokerConf.port);
             brokerConf.securePort = getInt(Const.DEFAULT_PORT_SECURE, aux, brokerConf.securePort);
@@ -160,6 +179,44 @@ public class BrokerConfiguration {
                 brokerConf.secConf.clientCertificatePassword = getString(Const.CERTIFICATE_PASSWORD, aux,  brokerConf.secConf.clientCertificatePassword);
                 brokerConf.secConf.keyPassword = getString(Const.KEY_PASSWORD, aux,  brokerConf.secConf.keyPassword);
             }
+
+            return brokerConf;
+        }catch (Exception e){
+            throw new UnknownError(e.getMessage());
+        }
+    }
+    static protected BrokerConfiguration loadConfiguration(BrokerConfiguration brokerConf,  BrokerConfiguration reference){
+        try {
+            brokerConf.hostname = reference.hostname;
+            brokerConf.port = reference.port;
+            brokerConf.securePort = reference.securePort;
+            brokerConf.filePersistence = reference.filePersistence;
+            brokerConf.pubQoS = reference.pubQoS;
+            brokerConf.subQoS = reference.subQoS;
+            brokerConf.retainPolicy = reference.retainPolicy;
+            brokerConf.noTries = reference.noTries;
+            brokerConf.reconnectWaitingTime = reference.reconnectWaitingTime;
+            brokerConf.pubQoS = reference.pubQoS;
+            brokerConf.timeOut = reference.timeOut;
+            brokerConf.keepAlive = reference.keepAlive;
+            brokerConf.maxInFlightMessages = reference.maxInFlightMessages;
+            brokerConf.version = reference.version;
+            brokerConf.automaticReconnect = reference.automaticReconnect;
+            brokerConf.cleanSession = reference.cleanSession;
+            brokerConf.user = reference.user;
+            brokerConf.password = reference.password;
+
+
+            if (reference.secConf!=null) {
+                brokerConf.secConf = brokerConf.getInitSecurityConfiguration();
+                brokerConf.secConf.CApath = reference.secConf.CApath;
+                brokerConf.secConf.clientCertificatePath = reference.secConf.clientCertificatePath;
+                brokerConf.secConf.keyPath = reference.secConf.keyPath;
+                brokerConf.secConf.CAPassword = reference.secConf.CAPassword;
+                brokerConf.secConf.clientCertificatePassword = reference.secConf.clientCertificatePassword;
+                brokerConf.secConf.keyPassword = reference.secConf.keyPassword;
+            }else
+                brokerConf.secConf = null;
 
             return brokerConf;
         }catch (Exception e){
@@ -200,16 +257,18 @@ public class BrokerConfiguration {
         return mqttClient;
     }
     protected BrokerConfiguration(){
-        // nothing
+        loadConfiguration("",this);
     }
     public BrokerConfiguration(String alias){
-        loadConfiguration(alias,this);
+        this.alias = alias;
+        loadConfiguration(this, loadConfigurations().get(alias));
     }
 
     public BrokerConfiguration(String alias, String ID){
         this.id =ID;
-        loadConfiguration(alias, this);
+        loadConfiguration(this, loadConfigurations().get(alias));
     }
+    @JsonIgnore
     public MqttClient initClient() throws MqttException {
         return initClient(this);
     }
@@ -284,11 +343,13 @@ public class BrokerConfiguration {
 
         return Broker.getBrokerURL(hostname, port);
     }
+    @JsonIgnore
     public MqttConnectOptions getInitMqttConnectOptions(){
         if(mqttOptions==null)
             mqttOptions = initMqttOptions(this);
         return mqttOptions;
     }
+    @JsonIgnore
     public MqttConnectOptions getMqttConnectOptions(){
         if(mqttOptions==null)
             mqttOptions = initMqttOptions(this);
@@ -443,13 +504,17 @@ public class BrokerConfiguration {
     public void setWillTopic(String willTopic) {
         this.willTopic = willTopic;
     }
-
+    @JsonIgnore
     public MqttConnectOptions getMqttOptions() {
         return mqttOptions;
     }
-
+    @JsonIgnore
     public void setMqttOptions(MqttConnectOptions mqttOptions) {
         this.mqttOptions = mqttOptions;
+    }
+
+    public static BrokerConfiguration remove(String alias) {
+        return aliasBrokerConf.remove(alias);
     }
 
     public class BrokerSecurityConfiguration{

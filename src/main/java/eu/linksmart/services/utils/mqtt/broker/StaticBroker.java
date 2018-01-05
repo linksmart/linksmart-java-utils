@@ -120,6 +120,11 @@ public class StaticBroker implements Broker{
     }
 
     @Override
+    public boolean hasListeners() {
+        return brokerService.listener.hasObservers();
+    }
+
+    @Override
     public void setBrokerPort(String brokerPort) throws Exception {
 
         brokerService.setBrokerPort(brokerPort);
@@ -186,7 +191,7 @@ public class StaticBroker implements Broker{
 
     @Override
     public String getAlias() {
-        return brokerService.getAlias();
+        return brokerService.getAlias(clientID);
     }
 
     @Override
