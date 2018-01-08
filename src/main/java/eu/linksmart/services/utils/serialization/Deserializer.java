@@ -34,7 +34,7 @@ import java.util.Map;
  *
  * */
 public interface Deserializer {
-    static final Deserializer defaultDeserializer = new DefaultDeserializer();
+    Deserializer defaultDeserializer = new DefaultDeserializer();
 
     /**
      * The class takes a text representation of an object, probably json, and parse and construct an java object from it.

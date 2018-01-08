@@ -9,9 +9,9 @@ import java.util.Set;
  */
 public interface ConfigurationConst {
 
-    final static Set<String> DEFAULT_CONFIGURATION_FILE = initConst();
-    static final String DEFAULT_DIRECTORY_CONFIGURATION_FILE = "__def__conf__.cfg";
-    static final Character ListDelimiter = ',';
+    Set<String> DEFAULT_CONFIGURATION_FILE = initConst();
+    String DEFAULT_DIRECTORY_CONFIGURATION_FILE = "__def__conf__.cfg";
+    Character ListDelimiter = ',';
 
     static Set<String> initConst(){
         Set<String> list = new HashSet<>();

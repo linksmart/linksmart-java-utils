@@ -18,6 +18,8 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by José Ángel Carvajal on 06.08.2015 a researcher of Fraunhofer FIT.
@@ -25,7 +27,9 @@ import java.util.*;
 public class Configurator extends CombinedConfiguration {
 
     static final protected Configurator def= init();
-
+    private List<String> loadedFiles = new ArrayList<>();
+    private ConcurrentMap<String,Object> runtime= new ConcurrentHashMap<>();
+    private boolean enableEnvironmentalVariables =false;
 
     static public synchronized Configurator getDefaultConfig(){
 
@@ -66,8 +70,6 @@ public class Configurator extends CombinedConfiguration {
         this(ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE);
 
     }
-    private List<String> loadedFiles = new ArrayList<>();
-    private boolean enableEnvironmentalVariables =false;
 
 
     public Configurator(String configurationFile) {
@@ -207,72 +209,52 @@ public class Configurator extends CombinedConfiguration {
 
     @Override
     public boolean getBoolean(String key) {
-        int i = mostRecentConf(key);
-
-        return i > -1 ? this.getConfiguration(i).getBoolean(key) : null;
+        return get(key, Boolean.class);
     }
 
     @Override
     public byte getByte(String key) {
-        int i = mostRecentConf(key);
-
-        return i > -1 ? this.getConfiguration(i).getByte(key) : null;
+        return get(key, Byte.class);
     }
 
     @Override
     public double getDouble(String key) {
-        int i = mostRecentConf(key);
-
-        return i>-1?this.getConfiguration(i).getDouble(key) : null;
+        return get(key, Double.class);
     }
 
     @Override
     public float getFloat(String key) {
-        int i = mostRecentConf(key);
-
-        return i>-1?this.getConfiguration(i).getFloat(key) :null;
+        return get(key, Float.class);
     }
 
     @Override
     public int getInt(String key) {
-        int i = mostRecentConf(key);
-
-        return i>-1?this.getConfiguration(i).getInt(key) : null;
+        return get(key, Integer.class);
     }
 
     @Override
     public long getLong(String key) {
-        int i = mostRecentConf(key);
-
-        return i>-1?this.getConfiguration(i).getLong(key) : null;
+        return get(key, Long.class);
     }
 
     @Override
     public short getShort(String key) {
-        int i = mostRecentConf(key);
-
-        return i>-1?this.getConfiguration(i).getShort(key) : null;
+        return get(key, Short.class);
     }
 
     @Override
     public BigDecimal getBigDecimal(String key) {
-        int i = mostRecentConf(key);
-
-        return i>-1?this.getConfiguration(i).getBigDecimal(key) : null;
+        return get(key, BigDecimal.class);
     }
 
     @Override
     public BigInteger getBigInteger(String key) {
-        int i = mostRecentConf(key);
-
-        return i>-1?this.getConfiguration(i).getBigInteger(key):null;
+        return get(key, BigInteger.class);
     }
 
     @Override
     public String getString(String key) {
-        int i = mostRecentConf(key);
-
-        return i>-1?this.getConfiguration(i).getString(key):null;
+        return get(key, String.class);
     }
 
     @Override
@@ -288,6 +270,14 @@ public class Configurator extends CombinedConfiguration {
             return result[0].split(",");
         else
             return result;
+    }
+    private <T>  T get(String key, Class<T> type){
+        int i = mostRecentConf(key);
+
+        return (T)runtime.getOrDefault(key,(i>-1?this.getConfiguration(i).get(type,key):null));
+    }
+    public void setSetting(String key, Object value){
+        runtime.put(key, value);
     }
 
     @Override

@@ -41,7 +41,7 @@ public interface Serializer {
      * @return the serialized object
      * @exception java.io.IOException if the object cannot be serialized
      * */
-    public<T> byte[] serialize(T object) throws IOException;
+    <T> byte[] serialize(T object) throws IOException;
 
     /**
      * Serialize in a string a given object.
@@ -52,7 +52,7 @@ public interface Serializer {
      * @return the serialized object as string
      * @exception java.io.IOException if the object cannot be serialized
      * */
-    public<T> String toString(T object) throws IOException;
+    <T> String toString(T object) throws IOException;
 
     <T> void addModule(String name, Class<T> tClass, SerializerMode<T> serializerMode);
 

@@ -10,8 +10,8 @@ import java.util.Observer;
  */
 public interface MqttMessageObserver extends Observer {
     @Override
-    public default void update(Observable o, Object arg){
+    default void update(Observable o, Object arg){
         update(((MqttMessage)arg).getTopic(),(MqttMessage)arg);
     }
-    public void update(String topic, MqttMessage message);
+    void update(String topic, MqttMessage message);
 }

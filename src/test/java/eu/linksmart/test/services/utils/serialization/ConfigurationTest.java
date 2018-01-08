@@ -108,6 +108,11 @@ public class ConfigurationTest {
         // ensure that the conf files are still loaded
         assertEquals(true, Configurator.getDefaultConfig().containsKeyAnywhere("my_test_shared_property"));
 
+        // testing setting properties
+        String test= configurator.getString("my_test_property");
+        configurator.setSetting("my_test_property","other value");
+        assertEquals(false, configurator.getString("my_test_property").equals(test));
+
         // release resources
         Configurator.getDefaultConfig().clear();
         configurator.clear();

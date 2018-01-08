@@ -4,13 +4,22 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
 import eu.linksmart.services.utils.function.Utils;
+import io.swagger.client.ApiClient;
+import io.swagger.client.api.ScApi;
+import io.swagger.client.model.Service;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
+import org.omg.CORBA.portable.UnknownException;
+import org.slf4j.Logger;
+import org.springframework.web.client.RestClientException;
 
 import javax.net.ssl.SSLSocketFactory;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -19,16 +28,22 @@ import java.util.concurrent.ConcurrentMap;
  * Created by José Ángel Carvajal on 23.09.2016 a researcher of Fraunhofer FIT.
  */
 public class BrokerConfiguration {
+    private static final String SC_API_NAME = "MQTT";
     // id of the configuration
     protected String id = UUID.randomUUID().toString();
     // alias (human readable) name of the broker
-    protected String alias = "local";
+    protected String alias = "default", realProfile = "default";
+    // the default config is set
+    private static boolean _defaultSet = false;
     // hostname or IP of the broker
-    protected String hostname = "localhost";
+    protected static String _hostname = "localhost";
+    protected String hostname = _hostname;
     // port of the broker
-    protected int port = 1883;
+    protected int _port = 1883;
+    protected int port = _port;
     // secure port of the broker
-    protected int securePort = 8883;
+    protected int _securePort = 8883;
+    protected int securePort = _securePort;
     // if the persistence is file base, otherwise is memory based
     protected boolean filePersistence = false;
     // default subscription quality of service I[0,2]
@@ -63,6 +78,9 @@ public class BrokerConfiguration {
     private String user = null;
     // password of the user (above) for connecting to the broker
     private String password = null;
+    // supported protocols
+    private static Set<String> protocols = new HashSet<>(Arrays.asList("tcp", "mqtt", "mqtt")), secureProtocols = new HashSet<>(Arrays.asList("tls", "ssl", "mqtts"));
+
     static private boolean loaded =false;
     @JsonIgnore
     private transient MqttConnectOptions mqttOptions = null;
@@ -71,7 +89,18 @@ public class BrokerConfiguration {
     @JsonIgnore
     private transient static final ConcurrentMap<String, BrokerConfiguration> aliasBrokerConf = new ConcurrentHashMap<>();
 
+    // using host, port and protocol form Service Catalog
+    static private transient ScApi SCclient = null;
+    static {
 
+        if(Utils.isRestAvailable(conf.getString(Const.LINKSMART_SERVICE_CATALOG_ENDPOINT))){
+            ApiClient apiClient = new ApiClient();
+            apiClient.setBasePath(conf.getString(Const.LINKSMART_SERVICE_CATALOG_ENDPOINT));
+            SCclient = new ScApi(apiClient);
+        }
+
+
+    }
     public static Map<String,BrokerConfiguration> loadConfigurations() throws UnknownError{
         try {
             if(!loaded) {
@@ -143,7 +172,6 @@ public class BrokerConfiguration {
             if(aliasBrokerConf.containsKey(alias))
                 return (brokerConf = aliasBrokerConf.get(alias));
 
-
             String aux = "".equals(alias)|| alias==null ? "":"_" + alias;
 
             brokerConf = aliasBrokerConf.getOrDefault(alias,brokerConf);
@@ -180,12 +208,16 @@ public class BrokerConfiguration {
                 brokerConf.secConf.keyPassword = getString(Const.KEY_PASSWORD, aux,  brokerConf.secConf.keyPassword);
             }
 
+            linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
+
             return brokerConf;
         }catch (Exception e){
             throw new UnknownError(e.getMessage());
         }
     }
     static protected BrokerConfiguration loadConfiguration(BrokerConfiguration brokerConf,  BrokerConfiguration reference){
+        if(reference == null)
+            throw  new UnknownException(new Exception("The provided broker configuration reference is not exists or it's null"));
         try {
             brokerConf.hostname = reference.hostname;
             brokerConf.port = reference.port;
@@ -217,11 +249,50 @@ public class BrokerConfiguration {
                 brokerConf.secConf.keyPassword = reference.secConf.keyPassword;
             }else
                 brokerConf.secConf = null;
+            linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
+
+            if(reference.equals(brokerConf))
+                brokerConf.realProfile = reference.realProfile;
 
             return brokerConf;
         }catch (Exception e){
             throw new UnknownError(e.getMessage());
         }
+    }
+    static protected synchronized BrokerConfiguration linksmartServiceCatalogOverwrite(BrokerConfiguration brokerConfiguration, String alias){
+        try {
+
+            if (SCclient != null ){
+
+                Service service =null;
+                try{
+                    service =SCclient.idGet(alias);
+                }catch (RestClientException e){
+                    if(_defaultSet)
+                        return brokerConfiguration;
+                    service = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
+                    _defaultSet = true;
+
+                }
+
+                URI url = new URI(service.getApis().get(SC_API_NAME));
+
+                brokerConfiguration.hostname = url.getHost();
+                if(protocols.contains(url.getScheme())) {
+                    brokerConfiguration.port = url.getPort();
+                    brokerConfiguration.hostname = url.getHost();
+                }
+                if(secureProtocols.contains(url.getScheme())){
+                    brokerConfiguration.port = url.getPort();
+                    brokerConfiguration.hostname = url.getHost();
+
+                }
+
+            }
+        }catch (Exception ignored){
+            //nothing
+        }
+        return  brokerConfiguration;
     }
     static private String getString(String key, String postFix, String Default){
         if(conf.containsKeyAnywhere(key + postFix))
@@ -260,13 +331,18 @@ public class BrokerConfiguration {
         loadConfiguration("",this);
     }
     public BrokerConfiguration(String alias){
-        this.alias = alias;
-        loadConfiguration(this, loadConfigurations().get(alias));
+        init(alias,id);
     }
 
     public BrokerConfiguration(String alias, String ID){
-        this.id =ID;
-        loadConfiguration(this, loadConfigurations().get(alias));
+      init(alias,ID);
+    }
+    private void init(String alias, String id){
+        this.id = id;
+        if(loadConfigurations().containsKey(alias))
+            loadConfiguration(this, loadConfigurations().get(alias));
+        else
+            loadConfiguration(alias,this);
     }
     @JsonIgnore
     public MqttClient initClient() throws MqttException {

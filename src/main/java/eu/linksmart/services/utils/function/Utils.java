@@ -13,6 +13,8 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.*;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.*;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -323,4 +325,30 @@ public class  Utils {
 
         return properties;
     }
+    /**
+     *
+     * Test if given endpoint exists
+     * @param url of service to test
+     * @return true if exists, false otherwise
+     *
+     * */
+    public static boolean isRestAvailable(String url) {
+
+        try {
+            URL siteURL = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) siteURL
+                    .openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+
+            int code = connection.getResponseCode();
+            if (code == 200) {
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
 }
