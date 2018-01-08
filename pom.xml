@@ -270,4 +270,23 @@
         </plugins>
 
     </build>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://nexus.linksmart.eu/repository/public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>Eclipse Paho Repo</id>
+            <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+        </repository>
+    </repositories>
 </project>
