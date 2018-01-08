@@ -110,7 +110,7 @@
         <linksmart.major.version>2</linksmart.major.version>
         <linksmart.minor.version>2</linksmart.minor.version>
         <linksmart.patch.version>0</linksmart.patch.version>
-        <linksmart.version>${linksmart.major.version}.${linksmart.minor.version}</linksmart.version>
+        <linksmart.version>${linksmart.major.version}.${linksmart.minor.version}.${linksmart.patch.version}</linksmart.version>
         <jodatime.version>2.9.9</jodatime.version>
     </properties>
     <dependencies>
