@@ -10,7 +10,7 @@ import java.util.Set;
 public interface ConfigurationConst {
 
     Set<String> DEFAULT_CONFIGURATION_FILE = initConst();
-    String DEFAULT_DIRECTORY_CONFIGURATION_FILE = "__def__conf__.cfg";
+    String DEFAULT_DIRECTORY_CONFIGURATION_FILE = "__def__utils__conf__.cfg";
     Character ListDelimiter = ',';
 
     static Set<String> initConst(){

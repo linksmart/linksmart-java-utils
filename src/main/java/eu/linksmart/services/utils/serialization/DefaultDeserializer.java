@@ -8,7 +8,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.linksmart.services.utils.function.Utils;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -53,12 +52,12 @@ public class DefaultDeserializer implements Deserializer{
     }
 
     @Override
-    public Object parsePacked(String objectString, TypeReference type) throws IOException, NotImplementedException {
+    public Object parsePacked(String objectString, TypeReference type) throws IOException, UnsupportedOperationException {
         return mapper.readValue(objectString,type );
     }
 
     @Override
-    public Object deserializePacked(byte[] bytes, TypeReference type) throws IOException, NotImplementedException {
+    public Object deserializePacked(byte[] bytes, TypeReference type) throws IOException, UnsupportedOperationException {
         return mapper.readValue(bytes,type );
     }
 

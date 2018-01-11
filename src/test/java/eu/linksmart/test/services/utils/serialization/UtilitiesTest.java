@@ -1,6 +1,7 @@
 package eu.linksmart.test.services.utils.serialization;
 
 import eu.linksmart.services.utils.function.Utils;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.io.File;
@@ -34,7 +35,7 @@ public class UtilitiesTest {
             e.printStackTrace();
             fail();
         }
-        assertEquals(true, null != Utils.initLoggingConf(this.getClass()));
+        assertEquals(true, null != LogManager.getLogger(this.getClass()));
         try {
             File file = File.createTempFile("test","tmp");
             assertEquals(true,Utils.isFile(file.getCanonicalPath()));

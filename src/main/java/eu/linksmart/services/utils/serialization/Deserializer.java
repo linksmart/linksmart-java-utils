@@ -1,13 +1,4 @@
-package eu.linksmart.services.utils.serialization;
-
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-/**
+/*
  *  Copyright [2013] [Fraunhofer-Gesellschaft]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +15,12 @@ import java.util.Map;
  *
  *
  */
+package eu.linksmart.services.utils.serialization;
+
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import java.io.IOException;
 /**
  * Interface hides the underlying deserialization or parsing technology used in the IoT Agents.
  * E.g. Jackson, Gson, Java serialization, etc.
@@ -52,7 +49,7 @@ public interface Deserializer {
      *
      *
      * */
-    <T> T parse(String objectString, Class<T> tClass) throws IOException, NotImplementedException;
+    <T> T parse(String objectString, Class<T> tClass) throws IOException, UnsupportedOperationException;
     /**
      * The class takes a array of bytes which may be a serialized object or the serialization of the string representation of an object,
      * and instantiate an object out of it.
@@ -70,13 +67,13 @@ public interface Deserializer {
      *
      *
      * */
-    <T> T deserialize(byte[] bytes, Class<T> tClass) throws IOException, NotImplementedException;
+    <T> T deserialize(byte[] bytes, Class<T> tClass) throws IOException, UnsupportedOperationException;
 
     <I,C extends I> boolean defineClassToInterface(Class<I> tInterface,Class<C>... tClass );
 
-    Object parsePacked(String objectString, TypeReference type)  throws IOException, NotImplementedException;
+    Object parsePacked(String objectString, TypeReference type)  throws IOException, UnsupportedOperationException;
 
-    Object deserializePacked(byte[] bytes, TypeReference type)  throws IOException, NotImplementedException;
+    Object deserializePacked(byte[] bytes, TypeReference type)  throws IOException, UnsupportedOperationException;
 
     <T> void addModule(String name, Class<T> tClass, DeserializerMode<T> deserializerMode);
 

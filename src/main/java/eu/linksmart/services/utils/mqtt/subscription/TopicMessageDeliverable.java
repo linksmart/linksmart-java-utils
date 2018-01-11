@@ -7,8 +7,8 @@ import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import eu.linksmart.services.utils.serialization.DefaultDeserializer;
 import eu.linksmart.services.utils.serialization.Deserializer;
 import eu.linksmart.testing.tooling.MessageValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -20,8 +20,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by José Ángel Carvajal on 23.03.2016 a researcher of Fraunhofer FIT.
  */
 public class TopicMessageDeliverable implements Runnable{
-    protected LinkedBlockingQueue<MqttMessage> mqttMessages = new LinkedBlockingQueue<>();
-    protected LinkedList<Observer> observers = new LinkedList<Observer>();
+    private LinkedBlockingQueue<MqttMessage> mqttMessages = new LinkedBlockingQueue<>();
+    private LinkedList<Observer> observers = new LinkedList<>();
     protected final String topic;
 
     //Start of code made for testing performance
@@ -30,18 +30,18 @@ public class TopicMessageDeliverable implements Runnable{
     private final MessageValidator validator;
     //End of code made for testing performance
 
-    protected transient Logger loggerService = Utils.initLoggingConf(this.getClass());
+    protected transient Logger loggerService = LogManager.getLogger(TopicMessageDeliverable.class);
     public TopicMessageDeliverable(String topic) {
-        LOG.debug("Starting new ");
+        loggerService.debug("Starting new ");
         Thread thread =new Thread(this);
         thread.start();
 
         this.topic=topic;
 
         /// Code for validation and test proposes
-        if(VALIDATION_MODE = Configurator.getDefaultConfig().containsKeyAnywhere(Const.VALIDATION_DELIVERER)) {
+        if(VALIDATION_MODE = Configurator.getDefaultConfig(this.getClass()).containsKeyAnywhere(Const.VALIDATION_DELIVERER)) {
             deserializer = new DefaultDeserializer();
-            validator = new MessageValidator(this.getClass(),topic,Configurator.getDefaultConfig().getLong(Const.VALIDATION_LOT_SIZE));
+            validator = new MessageValidator(this.getClass(),topic,Configurator.getDefaultConfig(this.getClass()).getLong(Const.VALIDATION_LOT_SIZE));
         }else{
             deserializer = null;
             validator = null;
@@ -53,9 +53,7 @@ public class TopicMessageDeliverable implements Runnable{
         this.activeTopic = activeTopic;
     }
 
-    protected boolean activeTopic = true;
-    protected static final Logger LOG=  LoggerFactory.getLogger(TopicMessageDeliverable.class);
-
+    private boolean activeTopic = true;
 
     public synchronized void addObserver(Observer observer){
         if(!observers.contains(observer))
@@ -66,24 +64,24 @@ public class TopicMessageDeliverable implements Runnable{
 
     @Override
     public void run() {
-        MqttMessage message=null;
-        boolean active =true;
+        MqttMessage message;
+        boolean active;
         synchronized (this) {
              active = activeTopic;
         }
         while (active) {
 
-            LOG.debug(" Started the topic loop");
+            loggerService.debug(" Started the topic loop");
             try {
                 message = mqttMessages.take();
-                LOG.debug("Processing incoming message of topic "+ message.getTopic());
+                loggerService.debug("Processing incoming message of topic "+ message.getTopic());
                 synchronized (this) {
                     for (Observer observer : observers)
                         observer.update(null, message);
                 }
 
             } catch (Exception e) {
-               LOG.error(e.getMessage(),e);
+               loggerService.error(e.getMessage(),e);
             }
             synchronized (this) {
                 active = activeTopic;

@@ -1,7 +1,7 @@
 package eu.linksmart.services.utils.mqtt.types;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.UUID;
@@ -10,7 +10,7 @@ import java.util.UUID;
  * Created by Caravajal on 25.03.2015.
  */
 public class MqttMessage implements Serializable {
-    protected static Logger LOG = LoggerFactory.getLogger(MqttMessage.class);
+    private static Logger LOG = LogManager.getLogger(MqttMessage.class);
     private static final long serialVersionUID = -1353455745007862618L;
     private String topic = null;
     private byte[] payload = null;
@@ -117,7 +117,7 @@ public class MqttMessage implements Serializable {
         return originProtocol;
     }
     public String getMessageHash(){
-        return originProtocol.toString()+"#"+topic+"#"+sequence;
+        return ((originProtocol!=null)?originProtocol.toString()+"#":"")+topic+"#"+sequence;
     }
 
 

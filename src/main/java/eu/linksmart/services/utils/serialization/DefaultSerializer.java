@@ -21,8 +21,8 @@ import java.io.IOException;
  */
 public class DefaultSerializer implements Serializer{
 
-    protected ObjectMapper parser = new ObjectMapper();
-    protected Configurator conf = Configurator.getDefaultConfig();
+    private ObjectMapper parser = new ObjectMapper();
+    protected Configurator conf = Configurator.getDefaultConfig(this.getClass());
 
     public DefaultSerializer() {
 

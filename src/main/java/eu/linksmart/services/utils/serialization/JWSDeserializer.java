@@ -7,10 +7,12 @@ import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.ECKey;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import sun.security.rsa.RSAPublicKeyImpl;
 
 import java.io.IOException;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
+// import sun.security.rsa.RSAPublicKeyImpl
 import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,8 +54,13 @@ public class JWSDeserializer implements Deserializer {
                 if (algorithmName.substring(0, 2).equals("RS") || algorithmName.substring(0, 1).equals("PS"))
                     verifiers.putIfAbsent(
                             keyName,
-                            new RSASSAVerifier(new RSAPublicKeyImpl(Base64.getDecoder().decode(keys.get(keyName))))
+                            new RSASSAVerifier(
+                                    (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(
+                                            new X509EncodedKeySpec( Base64.getDecoder().decode(keys.get(keyName)) )
+                                    )
+                            )
                     );
+                    // new RSASSAVerifier(new RSAPublicKeyImpl(Base64.getDecoder().decode(keys.get(keyName))))
                 else if (algorithmName.substring(0, 2).equals("EC"))
                     verifiers.putIfAbsent(
                             keyName,
@@ -118,12 +125,12 @@ public class JWSDeserializer implements Deserializer {
     }
 
     @Override
-    public Object parsePacked(String objectString, TypeReference type) throws IOException, NotImplementedException {
+    public Object parsePacked(String objectString, TypeReference type) throws IOException, UnsupportedOperationException {
         return deserializer.parsePacked(objectString, type);
     }
 
     @Override
-    public Object deserializePacked(byte[] bytes, TypeReference type) throws IOException, NotImplementedException {
+    public Object deserializePacked(byte[] bytes, TypeReference type) throws IOException, UnsupportedOperationException {
         return deserializer.deserializePacked(bytes,type);
     }
 

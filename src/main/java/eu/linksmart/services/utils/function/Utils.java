@@ -1,29 +1,5 @@
-package eu.linksmart.services.utils.function;
 
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import eu.linksmart.services.utils.configuration.Configurator;
-import eu.linksmart.services.utils.constants.Const;
-import org.apache.log4j.PropertyConfigurator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.*;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Properties;
-import java.util.TimeZone;
-
-/**
+/*
  *  Copyright [2013] [Fraunhofer-Gesellschaft]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +16,27 @@ import java.util.TimeZone;
  *
  *
  */
+package eu.linksmart.services.utils.function;
+
+
+import eu.linksmart.services.utils.configuration.Configurator;
+import eu.linksmart.services.utils.constants.Const;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.*;
+import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Properties;
+import java.util.TimeZone;
+
 /**
  * Provide a set of commonly needed functions. The idea of this Utility class is to centralized all code is used everyplace but not belongs specially in any place.
  *
@@ -59,10 +56,13 @@ public class  Utils {
      * @return the pom version
      * */
     public static synchronized String getVersion() {
+        return getVersion("version");
+    }
+    public static synchronized String getVersion(String version) {
         final Properties properties = new Properties();
         try {
-            properties.load(Utils.class.getClassLoader().getResourceAsStream("ver.properties"));
-            return properties.getProperty("version");
+            properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("version.properties"));
+            return properties.getProperty(version);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -76,12 +76,12 @@ public class  Utils {
     static public DateFormat getDateFormat(){
         DateFormat dateFormat;
         TimeZone tz = getTimeZone();
-        if(Configurator.getDefaultConfig().getString(Const.TIME_FORMAT_CONF_PATH) == null)
+        if(Configurator.getDefaultConfig(Utils.class).getString(Const.TIME_FORMAT_CONF_PATH) == null)
 
             dateFormat= new SimpleDateFormat(Const.TIME_ISO_FORMAT_MS_TZ);
 
         else
-             dateFormat =new SimpleDateFormat(Configurator.getDefaultConfig().getString(Const.TIME_FORMAT_CONF_PATH) );
+             dateFormat =new SimpleDateFormat(Configurator.getDefaultConfig(Utils.class).getString(Const.TIME_FORMAT_CONF_PATH) );
 
         dateFormat.setTimeZone(tz);
 
@@ -119,7 +119,7 @@ public class  Utils {
      * @return a default TimeZone
      * */
     static public TimeZone getTimeZone(){
-        String tzs = Configurator.getDefaultConfig().getString(Const.TIME_TIMEZONE_CONF_PATH);
+        String tzs = Configurator.getDefaultConfig(Utils.class).getString(Const.TIME_TIMEZONE_CONF_PATH);
         if(tzs == null || tzs.equals(""))
             tzs = "UTC";
 
@@ -167,11 +167,11 @@ public class  Utils {
         return new BigInteger(1,SHA256.digest((string).getBytes())).toString(16);
     }
     // TODO: No Unit test. Not sure how
-    /**
+ /*   *//*
      * Provide a default method and unique method to get the logging service regardless of the implementation. Additionally, for the reloading of the logging  configuration
      * @param lass is the class which want to load the logging service
      * @return the logging service
-     * */
+     * *//*
     public static Logger initLoggingConf(Class lass){
         Logger loggerService = null;
         try {
@@ -180,26 +180,26 @@ public class  Utils {
 
             if(!isLoggingConfLoaded) {
 
-                if (isFile(Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile))) {
+                if (isFile(Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile))) {
                     //loading from file system
-                    final FileInputStream configStream = new FileInputStream(Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile));
+                    final FileInputStream configStream = new FileInputStream(Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile));
                     p.load(configStream);
                     PropertyConfigurator.configure(p);
                     configStream.close();
-                    System.setProperty("log4j.configuration", Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile));
+                    System.setProperty("log4j.configuration", Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile));
                     message = "Loading from configuration from given file";
-                } else if (isResource(Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile), lass)) {
+                } else if (isResource(Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile), lass)) {
                     //loading from class resource file
-                    InputStream in = lass.getClassLoader().getResourceAsStream(Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile));
+                    InputStream in = lass.getClassLoader().getResourceAsStream(Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile));
                     p.load(in);
                     PropertyConfigurator.configure(p);
                     in.close();
                     message = "Loading from configuration from jar default file";
-                } else if (Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile)!=null&&isResource(Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile))) {
+                } else if (Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile)!=null&&isResource(Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile))) {
                     //loading from Utils class resource file
-                    InputStream in = Utils.class.getClassLoader().getResourceAsStream(Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile));
+                    InputStream in = Utils.class.getClassLoader().getResourceAsStream(Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile));
                     p.load(in);
-                    System.setProperty("log4j.configuration", Configurator.getDefaultConfig().getString(Const.LoggingDefaultLoggingFile));
+                    System.setProperty("log4j.configuration", Configurator.getDefaultConfig(lass).getString(Const.LoggingDefaultLoggingFile));
                     PropertyConfigurator.configure(p);
                     in.close();
                     message = "Loading from configuration from Utils jar default file (last resort!)";
@@ -219,18 +219,18 @@ public class  Utils {
 
         }
 
-        loggerService.info("Logging configuration file had been initialized");
+        loggerService.debug("Logging configuration file had been initialized");
         return loggerService;
 
-    }
+    }*/
     // TODO: No Unit test
-    /**
+    /*
      * Provide a quick method to force the reloading of the logging service infrastructure using initLoggingConf(Utils.class)
-     * */
+     *
     public static void initLoggingConf(){
         initLoggingConf(Utils.class);
 
-    }
+    }*/
 
     // TODO: No Unit test
     /**

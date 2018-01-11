@@ -1,6 +1,6 @@
 package eu.linksmart.testing.tooling;
 
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.time.Instant;
 import java.util.Date;
@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
  */
 public class CounterTask extends TimerTask {
 
-    volatile protected long i = 0,n =1, total;
+    volatile  private long i = 0,n =1, total;
     protected Logger loggerService = null;
-    volatile protected Map<String, Long> counters = new ConcurrentHashMap<>();
+    volatile private Map<String, Long> counters = new ConcurrentHashMap<>();
     final private boolean topicCounter;
 
     public CounterTask() {
@@ -40,9 +40,9 @@ public class CounterTask extends TimerTask {
 
     public void run() {
         double avg;
-        long messages =0;
-        Date before = new Date(), after;
-        String counterStr = "";
+        long messages;
+
+        String counterStr;
 
         if((messages = i) == 0)
             return;
@@ -52,7 +52,7 @@ public class CounterTask extends TimerTask {
 
         avg = total / n;
         n++;
-        after = new Date();
+
 
 
         counterStr = counters.entrySet()
@@ -72,7 +72,6 @@ public class CounterTask extends TimerTask {
             loggerService.info(message);
         else
             System.out.println(message);
-        before = new Date();
 
 
     }

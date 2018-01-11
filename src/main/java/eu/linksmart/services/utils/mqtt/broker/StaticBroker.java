@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
  */
 public class StaticBroker implements Broker{
 
-    protected StaticBrokerService brokerService;
-    protected UUID clientID;
-    protected Map<Topic,ArrayList<Observer>> observersByTopic = new Hashtable<>();
-    protected Map<Observer,Topic> observers = new Hashtable<>();
-    protected boolean needsReconnect = false;
-    private Configurator conf = Configurator.getDefaultConfig();
+    private StaticBrokerService brokerService;
+    private UUID clientID;
+    private Map<Topic,ArrayList<Observer>> observersByTopic = new Hashtable<>();
+    private Map<Observer,Topic> observers = new Hashtable<>();
+    private boolean needsReconnect = false;
+    private Configurator conf = Configurator.getDefaultConfig(this.getClass());
 
     public StaticBroker(String brokerName, String brokerPort, String will, String willTopic) throws MalformedURLException, MqttException {
         clientID = UUID.randomUUID();

@@ -26,33 +26,33 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class Configurator extends CombinedConfiguration {
 
-    static final protected Configurator def= init();
+    private static final Configurator def= init();
     private List<String> loadedFiles = new ArrayList<>();
     private ConcurrentMap<String,Object> runtime= new ConcurrentHashMap<>();
     private boolean enableEnvironmentalVariables =false;
 
-    static public synchronized Configurator getDefaultConfig(){
+    static public synchronized Configurator getDefaultConfig(Class caller){
 
-       if( def.loadedFiles.stream().allMatch(ConfigurationConst.DEFAULT_CONFIGURATION_FILE::equals) )
+       if( def.loadedFiles.stream().allMatch(ConfigurationConst.DEFAULT_CONFIGURATION_FILE::contains) )
            return def;
         else
-            ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> confFile != null).forEach(Configurator::addConfFile);
+            ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(Objects::nonNull).forEach(f->Configurator.addConfFile(f, caller));
 
 
         return def;
     }
 
-    static public synchronized boolean addConfFile(String filePath) {
+    static public synchronized boolean addConfFile(String filePath, Class caller) {
      
         ConfigurationConst.DEFAULT_CONFIGURATION_FILE.add(filePath);
 
-        return def.addConfigurationFile(filePath);
+        return def.addConfigurationFile(filePath,caller);
     }
-    public synchronized boolean addConfigurationFile(String filePath) {
-        if(!fileExists(filePath))
+    public synchronized boolean addConfigurationFile(String filePath, Class caller) {
+        if(!fileExists(filePath,caller))
             return false;
         if(!loadedFiles.contains(filePath)) {
-            this.addConfiguration(new Configurator(filePath));
+            this.addConfiguration(new Configurator(filePath,caller));
             loadedFiles.add(filePath);
         }
        return true;
@@ -61,50 +61,50 @@ public class Configurator extends CombinedConfiguration {
     static protected Configurator init(){
         Configurator configurator = new Configurator();
 
-        ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> !ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE.equals(confFile)).filter(confFile -> confFile != null).forEach(confFile -> configurator.append(new Configurator(confFile)));
+        ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> !ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE.equals(confFile)).filter(Objects::nonNull).forEach(confFile -> configurator.append(new Configurator(confFile,Configurator.class)));
 
         return configurator;
 
     }
     protected Configurator() {
-        this(ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE);
+        this(ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE, Utils.class);
 
     }
 
 
-    public Configurator(String configurationFile) {
+    public Configurator(String configurationFile, Class caller) {
         super();
 
-        String filename= configurationFile,extension=null;
+        String extension;
 
 
-        if(!fileExists(filename)) {
+        if(!fileExists(configurationFile, caller)) {
             System.err.println("File named " + configurationFile + " was not found!'");
             return;
         }
-        if(filename!=null){
-            int i = filename.lastIndexOf('.');
+        if(configurationFile !=null){
+            int i = configurationFile.lastIndexOf('.');
             if (i > 0) {
-                extension = filename.substring(i + 1);
+                extension = configurationFile.substring(i + 1);
                 try {
                     switch (extension) {
                         case "properties":
                         case "cfg":
-                            addConfiguration(factoryBuilder(filename).getConfiguration(),filename);
+                            addConfiguration(factoryBuilder(configurationFile).getConfiguration(), configurationFile);
                             break;
                         case "xml":
                             try {
-                                addConfiguration(factoryBuilder(filename, XMLPropertiesConfiguration.class).getConfiguration());
+                                addConfiguration(factoryBuilder(configurationFile, XMLPropertiesConfiguration.class).getConfiguration());
                             } catch (Exception e) {
-                                addConfiguration(factoryBuilder(filename, XMLConfiguration.class).getConfiguration());
+                                addConfiguration(factoryBuilder(configurationFile, XMLConfiguration.class).getConfiguration());
                             }
                             break;
                         default:
                             System.err.println("Not known extension of the configuration file trying to load as property file");
-                            addConfiguration(factoryBuilder(filename).getConfiguration());
+                            addConfiguration(factoryBuilder(configurationFile).getConfiguration());
                             break;
                     }
-                    loadedFiles.add(filename);
+                    loadedFiles.add(configurationFile);
                 } catch (Exception e) {
 
                     e.printStackTrace();
@@ -117,9 +117,9 @@ public class Configurator extends CombinedConfiguration {
 
 
 
-    private static boolean fileExists(String filename){
+    private static boolean fileExists(String filename, Class caller){
         File f = new File(filename);
-        URL u = Utils.class.getClassLoader().getResource(filename);
+        URL u = Thread.currentThread().getContextClassLoader().getResource(filename);
         return (f.exists() && !f.isDirectory())|| u!=null;
     }
 

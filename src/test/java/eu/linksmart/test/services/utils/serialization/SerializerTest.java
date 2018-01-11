@@ -3,14 +3,8 @@ package eu.linksmart.test.services.utils.serialization;
 import eu.linksmart.services.utils.serialization.*;
 
 import org.junit.Test;
-import sun.security.pkcs.PKCS8Key;
-import sun.security.rsa.RSAPrivateKeyImpl;
 
 import java.io.IOException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -21,8 +15,8 @@ import static org.junit.Assert.fail;
  */
 public class SerializerTest {
 
-    public static final String simpleStrTest = "{\"hello\":\"world\",\"int\":1,\"float\":1.0,\"vec\":[1,2,3,4]}";
-    public static final byte[] simpleBinTest = simpleStrTest.getBytes();
+    private static final String simpleStrTest = "{\"hello\":\"world\",\"int\":1,\"float\":1.0,\"vec\":[1,2,3,4]}";
+    private static final byte[] simpleBinTest = simpleStrTest.getBytes();
     @Test
     public void serializerTest(){
         Map mapS, mapB;
@@ -66,14 +60,14 @@ public class SerializerTest {
     public void JWSSerializationTest() {
         try {
 
-            Map<String,String> original = new Hashtable(), parsed;
+            Map<String,String> original = new Hashtable<>(), parsed;
             original.put("test","ok");
 
             JWSSerializer serializer = new JWSSerializer(new DefaultSerializer());
             Deserializer deserializer = new JWSDeserializer(Base64.getEncoder().encodeToString(serializer.getPublicKey().getEncoded()));
 
             String serialized = serializer.toString(original);
-            parsed = deserializer.parse(serialized,Map.class);
+            parsed =  deserializer.parse(serialized,Map.class);
 
            // assertEquals("The String after serialization is the same as before deserialization", simpleStrTest, serializer.toString(mapS));
 
@@ -83,7 +77,6 @@ public class SerializerTest {
         } catch (Exception e) {
             e.printStackTrace();
             fail();
-            return;
         }
 
 

@@ -13,7 +13,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.omg.CORBA.portable.UnknownException;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.client.RestClientException;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -85,7 +85,7 @@ public class BrokerConfiguration {
     @JsonIgnore
     private transient MqttConnectOptions mqttOptions = null;
     @JsonIgnore
-    private transient static Configurator conf = Configurator.getDefaultConfig();
+    private transient static Configurator conf = Configurator.getDefaultConfig(BrokerConfiguration.class);
     @JsonIgnore
     private transient static final ConcurrentMap<String, BrokerConfiguration> aliasBrokerConf = new ConcurrentHashMap<>();
 
@@ -170,7 +170,7 @@ public class BrokerConfiguration {
     static protected BrokerConfiguration loadConfiguration(String alias, BrokerConfiguration brokerConf){
         try {
             if(aliasBrokerConf.containsKey(alias))
-                return (brokerConf = aliasBrokerConf.get(alias));
+                return aliasBrokerConf.get(alias);
 
             String aux = "".equals(alias)|| alias==null ? "":"_" + alias;
 

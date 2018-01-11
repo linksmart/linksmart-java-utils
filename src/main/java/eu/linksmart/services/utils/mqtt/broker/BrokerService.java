@@ -2,29 +2,31 @@ package eu.linksmart.services.utils.mqtt.broker;
 
 
 import eu.linksmart.services.utils.configuration.Configurator;
+import eu.linksmart.services.utils.function.Utils;
 import eu.linksmart.services.utils.mqtt.subscription.ForwardingListener;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.LogManager;
 import org.eclipse.paho.client.mqttv3.*;
+import org.apache.logging.log4j.Logger;
 
-import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class BrokerService implements Observer, Broker {
-    protected transient static Logger loggerService = Logger.getLogger(BrokerService.class.getName());
+    protected transient static Logger loggerService = LogManager.getLogger(BrokerService.class);
     // this is the MQTT client to broker in the local broker
-    private transient Configurator conf = Configurator.getDefaultConfig();
-    protected transient MqttClient mqttClient;
-    protected transient ForwardingListener listener;
-    protected transient List<Observer> connectionListener = new ArrayList<>();
+    private transient Configurator conf = Configurator.getDefaultConfig(this.getClass());
+    transient MqttClient mqttClient;
+    transient ForwardingListener listener;
+    private transient List<Observer> connectionListener = new ArrayList<>();
 
     protected ArrayList<String> topics = new ArrayList<>();
-    protected ArrayList<Integer> qoss = new ArrayList<>();
+    private ArrayList<Integer> qoss = new ArrayList<>();
 
     private final transient static Object lock  = new Object();
 
-    protected final BrokerConfiguration brokerConf;
+    final BrokerConfiguration brokerConf;
 
     public BrokerService(String alias, UUID ID, String will, String topicWill) throws MqttException {
 

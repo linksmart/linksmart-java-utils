@@ -3,12 +3,14 @@ package eu.linksmart.services.utils.mqtt.subscription;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
+import eu.linksmart.services.utils.mqtt.broker.BrokerService;
 import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import eu.linksmart.services.utils.mqtt.types.Topic;
 import eu.linksmart.services.utils.serialization.DefaultDeserializer;
 import eu.linksmart.services.utils.serialization.Deserializer;
 import eu.linksmart.testing.tooling.MessageValidator;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 
@@ -20,19 +22,20 @@ import java.util.*;
  * Created by José Ángel Carvajal on 06.08.2015 a researcher of Fraunhofer FIT.
  */
 public  class ForwardingListener implements MqttCallback {
-    protected final UUID originProtocol;
-    protected  Observer  connectionListener = null;
-    protected static Logger LOG = Logger.getLogger(ForwardingListener.class.getName());
+    private final UUID originProtocol;
+    private Observer  connectionListener = null;
+    private static Logger LOG = LogManager.getLogger(BrokerService.class);
 
-    protected long sequence ;
-   protected Map<Topic, TopicMessageDeliverable> observables;
-    protected Map<String,TopicMessageDeliverable> compiledTopic = new Hashtable<>();
-    protected final  Object muxMessageDelivererSet = new Object();
-    protected  Set<Topic> messageDelivererSet = new HashSet<>();
+    private long sequence ;
+    private Map<Topic, TopicMessageDeliverable> observables;
+    private Map<String,TopicMessageDeliverable> compiledTopic = new Hashtable<>();
+
+    private final  Object muxMessageDelivererSet = new Object();
+    private Set<Topic> messageDelivererSet = new HashSet<>();
 
 
     //Start of code made for testing performance
-    protected final boolean VALIDATION_MODE;
+    private final boolean VALIDATION_MODE;
     private final Deserializer deserializer;
     private final MessageValidator validator;
     //End of code made for testing performance
@@ -42,9 +45,9 @@ public  class ForwardingListener implements MqttCallback {
         this.connectionListener = connectionListener;
 
         /// Code for validation and test proposes
-        if(VALIDATION_MODE = Configurator.getDefaultConfig().containsKeyAnywhere(Const.VALIDATION_FORWARDING)) {
+        if(VALIDATION_MODE = Configurator.getDefaultConfig(this.getClass()).containsKeyAnywhere(Const.VALIDATION_FORWARDING)) {
             deserializer = new DefaultDeserializer();
-            validator = new MessageValidator(this.getClass(),"0",Configurator.getDefaultConfig().getLong(Const.VALIDATION_LOT_SIZE));
+            validator = new MessageValidator(this.getClass(),"0",Configurator.getDefaultConfig(this.getClass()).getLong(Const.VALIDATION_LOT_SIZE));
         }else{
             deserializer = null;
             validator = null;

@@ -12,7 +12,7 @@ import java.util.*;
 public class StaticBrokerService extends BrokerService implements Broker {
     public static Map<String, StaticBrokerService> brokerServices = new Hashtable<>();
 
-    protected static Map<UUID,BrokerConfiguration> clients = new Hashtable<>();
+    private static Map<UUID,BrokerConfiguration> clients = new Hashtable<>();
 
 
     private StaticBrokerService(String alias, UUID ID, String will, String willTopic) throws MqttException {
@@ -25,7 +25,7 @@ public class StaticBrokerService extends BrokerService implements Broker {
         bConf.setWill(will);
         bConf.setWillTopic(willTopic);
         loggerService.info("Searching for proper broker...");
-        boolean optimizeConnections =(!Configurator.getDefaultConfig().containsKeyAnywhere(BrokerServiceConst.MULTI_CONNECTION) || !Configurator.getDefaultConfig().getBoolean(BrokerServiceConst.MULTI_CONNECTION));
+        boolean optimizeConnections =(!Configurator.getDefaultConfig(StaticBrokerService.class).containsKeyAnywhere(BrokerServiceConst.MULTI_CONNECTION) || !Configurator.getDefaultConfig(StaticBrokerService.class).getBoolean(BrokerServiceConst.MULTI_CONNECTION));
         if (!Broker.isBrokerURL(bConf.getURL()))
             throw new MalformedURLException(bConf.getURL() + " is not an broker URL");
         if (brokerServices.containsKey(bConf.toString()) && optimizeConnections) {
