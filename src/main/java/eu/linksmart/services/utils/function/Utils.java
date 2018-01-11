@@ -76,12 +76,12 @@ public class  Utils {
     static public DateFormat getDateFormat(){
         DateFormat dateFormat;
         TimeZone tz = getTimeZone();
-        if(Configurator.getDefaultConfig(Utils.class).getString(Const.TIME_FORMAT_CONF_PATH) == null)
+        if(Configurator.getDefaultConfig().getString(Const.TIME_FORMAT_CONF_PATH) == null)
 
             dateFormat= new SimpleDateFormat(Const.TIME_ISO_FORMAT_MS_TZ);
 
         else
-             dateFormat =new SimpleDateFormat(Configurator.getDefaultConfig(Utils.class).getString(Const.TIME_FORMAT_CONF_PATH) );
+             dateFormat =new SimpleDateFormat(Configurator.getDefaultConfig().getString(Const.TIME_FORMAT_CONF_PATH) );
 
         dateFormat.setTimeZone(tz);
 
@@ -119,7 +119,7 @@ public class  Utils {
      * @return a default TimeZone
      * */
     static public TimeZone getTimeZone(){
-        String tzs = Configurator.getDefaultConfig(Utils.class).getString(Const.TIME_TIMEZONE_CONF_PATH);
+        String tzs = Configurator.getDefaultConfig().getString(Const.TIME_TIMEZONE_CONF_PATH);
         if(tzs == null || tzs.equals(""))
             tzs = "UTC";
 
@@ -166,7 +166,7 @@ public class  Utils {
         }
         return new BigInteger(1,SHA256.digest((string).getBytes())).toString(16);
     }
-    // TODO: No Unit test. Not sure how
+    // TODO: please remove in version 1.3.0+
  /*   *//*
      * Provide a default method and unique method to get the logging service regardless of the implementation. Additionally, for the reloading of the logging  configuration
      * @param lass is the class which want to load the logging service
@@ -299,7 +299,7 @@ public class  Utils {
      * */
     public static boolean isResource(String filename){
 
-        return   Utils.class.getClassLoader().getResource(filename)!=null;
+        return   Thread.currentThread().getContextClassLoader().getResource(filename)!=null;
     }
     /**
      * Provide a quick method to find out if file exists in the JAR of the class loader of the Class clazz

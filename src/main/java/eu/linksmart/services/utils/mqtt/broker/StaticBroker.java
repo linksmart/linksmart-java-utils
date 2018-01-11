@@ -1,13 +1,11 @@
 package eu.linksmart.services.utils.mqtt.broker;
 
 import eu.linksmart.services.utils.configuration.Configurator;
-import eu.linksmart.services.utils.constants.Const;
 import eu.linksmart.services.utils.mqtt.types.Topic;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.net.MalformedURLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by José Ángel Carvajal on 23.10.2015 a researcher of Fraunhofer FIT.
@@ -19,7 +17,7 @@ public class StaticBroker implements Broker{
     private Map<Topic,ArrayList<Observer>> observersByTopic = new Hashtable<>();
     private Map<Observer,Topic> observers = new Hashtable<>();
     private boolean needsReconnect = false;
-    private Configurator conf = Configurator.getDefaultConfig(this.getClass());
+    private Configurator conf = Configurator.getDefaultConfig();
 
     public StaticBroker(String brokerName, String brokerPort, String will, String willTopic) throws MalformedURLException, MqttException {
         clientID = UUID.randomUUID();

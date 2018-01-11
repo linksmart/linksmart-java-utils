@@ -2,7 +2,6 @@ package eu.linksmart.services.utils.mqtt.broker;
 
 
 import eu.linksmart.services.utils.configuration.Configurator;
-import eu.linksmart.services.utils.function.Utils;
 import eu.linksmart.services.utils.mqtt.subscription.ForwardingListener;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 public class BrokerService implements Observer, Broker {
     protected transient static Logger loggerService = LogManager.getLogger(BrokerService.class);
     // this is the MQTT client to broker in the local broker
-    private transient Configurator conf = Configurator.getDefaultConfig(this.getClass());
+    private transient Configurator conf = Configurator.getDefaultConfig();
     transient MqttClient mqttClient;
     transient ForwardingListener listener;
     private transient List<Observer> connectionListener = new ArrayList<>();

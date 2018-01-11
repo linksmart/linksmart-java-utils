@@ -13,13 +13,10 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.omg.CORBA.portable.UnknownException;
-import org.apache.logging.log4j.Logger;
 import org.springframework.web.client.RestClientException;
 
 import javax.net.ssl.SSLSocketFactory;
-import java.math.BigDecimal;
 import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -85,7 +82,7 @@ public class BrokerConfiguration {
     @JsonIgnore
     private transient MqttConnectOptions mqttOptions = null;
     @JsonIgnore
-    private transient static Configurator conf = Configurator.getDefaultConfig(BrokerConfiguration.class);
+    private transient static Configurator conf = Configurator.getDefaultConfig();
     @JsonIgnore
     private transient static final ConcurrentMap<String, BrokerConfiguration> aliasBrokerConf = new ConcurrentHashMap<>();
 

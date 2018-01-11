@@ -1,12 +1,9 @@
 package eu.linksmart.services.utils.serialization;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -22,7 +19,7 @@ import java.io.IOException;
 public class DefaultSerializer implements Serializer{
 
     private ObjectMapper parser = new ObjectMapper();
-    protected Configurator conf = Configurator.getDefaultConfig(this.getClass());
+    protected Configurator conf = Configurator.getDefaultConfig();
 
     public DefaultSerializer() {
 

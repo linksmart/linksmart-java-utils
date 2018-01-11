@@ -7,9 +7,6 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
-import org.apache.commons.configuration2.tree.MergeCombiner;
-import org.apache.commons.configuration2.tree.NodeCombiner;
-import org.apache.commons.configuration2.tree.OverrideCombiner;
 
 
 import java.io.File;
@@ -31,28 +28,28 @@ public class Configurator extends CombinedConfiguration {
     private ConcurrentMap<String,Object> runtime= new ConcurrentHashMap<>();
     private boolean enableEnvironmentalVariables =false;
 
-    static public synchronized Configurator getDefaultConfig(Class caller){
+    static public synchronized Configurator getDefaultConfig(){
 
        if( def.loadedFiles.stream().allMatch(ConfigurationConst.DEFAULT_CONFIGURATION_FILE::contains) )
            return def;
         else
-            ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(Objects::nonNull).forEach(f->Configurator.addConfFile(f, caller));
+            ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(Objects::nonNull).forEach(f->Configurator.addConfFile(f));
 
 
         return def;
     }
 
-    static public synchronized boolean addConfFile(String filePath, Class caller) {
+    static public synchronized boolean addConfFile(String filePath) {
      
         ConfigurationConst.DEFAULT_CONFIGURATION_FILE.add(filePath);
 
-        return def.addConfigurationFile(filePath,caller);
+        return def.addConfigurationFile(filePath);
     }
-    public synchronized boolean addConfigurationFile(String filePath, Class caller) {
-        if(!fileExists(filePath,caller))
+    public synchronized boolean addConfigurationFile(String filePath) {
+        if(!fileExists(filePath))
             return false;
         if(!loadedFiles.contains(filePath)) {
-            this.addConfiguration(new Configurator(filePath,caller));
+            this.addConfiguration(new Configurator(filePath));
             loadedFiles.add(filePath);
         }
        return true;
@@ -61,24 +58,24 @@ public class Configurator extends CombinedConfiguration {
     static protected Configurator init(){
         Configurator configurator = new Configurator();
 
-        ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> !ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE.equals(confFile)).filter(Objects::nonNull).forEach(confFile -> configurator.append(new Configurator(confFile,Configurator.class)));
+        ConfigurationConst.DEFAULT_CONFIGURATION_FILE.stream().filter(confFile -> !ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE.equals(confFile)).filter(Objects::nonNull).forEach(confFile -> configurator.append(new Configurator(confFile)));
 
         return configurator;
 
     }
     protected Configurator() {
-        this(ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE, Utils.class);
+        this(ConfigurationConst.DEFAULT_DIRECTORY_CONFIGURATION_FILE);
 
     }
 
 
-    public Configurator(String configurationFile, Class caller) {
+    public Configurator(String configurationFile) {
         super();
 
         String extension;
 
 
-        if(!fileExists(configurationFile, caller)) {
+        if(!fileExists(configurationFile)) {
             System.err.println("File named " + configurationFile + " was not found!'");
             return;
         }
@@ -117,7 +114,7 @@ public class Configurator extends CombinedConfiguration {
 
 
 
-    private static boolean fileExists(String filename, Class caller){
+    private static boolean fileExists(String filename){
         File f = new File(filename);
         URL u = Thread.currentThread().getContextClassLoader().getResource(filename);
         return (f.exists() && !f.isDirectory())|| u!=null;

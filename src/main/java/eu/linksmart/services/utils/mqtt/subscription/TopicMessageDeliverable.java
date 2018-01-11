@@ -2,7 +2,6 @@ package eu.linksmart.services.utils.mqtt.subscription;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
-import eu.linksmart.services.utils.function.Utils;
 import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import eu.linksmart.services.utils.serialization.DefaultDeserializer;
 import eu.linksmart.services.utils.serialization.Deserializer;
@@ -39,9 +38,9 @@ public class TopicMessageDeliverable implements Runnable{
         this.topic=topic;
 
         /// Code for validation and test proposes
-        if(VALIDATION_MODE = Configurator.getDefaultConfig(this.getClass()).containsKeyAnywhere(Const.VALIDATION_DELIVERER)) {
+        if(VALIDATION_MODE = Configurator.getDefaultConfig().containsKeyAnywhere(Const.VALIDATION_DELIVERER)) {
             deserializer = new DefaultDeserializer();
-            validator = new MessageValidator(this.getClass(),topic,Configurator.getDefaultConfig(this.getClass()).getLong(Const.VALIDATION_LOT_SIZE));
+            validator = new MessageValidator(this.getClass(),topic,Configurator.getDefaultConfig().getLong(Const.VALIDATION_LOT_SIZE));
         }else{
             deserializer = null;
             validator = null;
