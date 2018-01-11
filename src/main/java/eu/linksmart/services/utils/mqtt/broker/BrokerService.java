@@ -127,7 +127,7 @@ public class BrokerService implements Observer, Broker {
     }
     public void publish(String topic, String payload) throws Exception {
 
-        publish(topic,payload.getBytes());
+        publish(topic,(payload!=null)?payload.getBytes():null);
     }
 
     public String getBrokerName() {

@@ -336,10 +336,11 @@ public class BrokerConfiguration {
     }
     private void init(String alias, String id){
         this.id = id;
-        if(loadConfigurations().containsKey(alias))
-            loadConfiguration(this, loadConfigurations().get(alias));
-        else
-            loadConfiguration(alias,this);
+        if(alias!=null && loadConfigurations() != null)
+            if(loadConfigurations().containsKey(alias))
+                loadConfiguration(this, loadConfigurations().get(alias));
+            else
+                loadConfiguration(alias,this);
     }
     @JsonIgnore
     public MqttClient initClient() throws MqttException {
