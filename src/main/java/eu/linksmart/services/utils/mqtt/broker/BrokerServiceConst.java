@@ -37,4 +37,5 @@ public interface BrokerServiceConst {
 
     String USER = "messaging_client_mqtt_security_user";
     String PASSWORD = "messaging_client_mqtt_security_password";
+    String AUTOBLACKLISTING = "messaging_client_mqtt_autoblacklisting";
 }

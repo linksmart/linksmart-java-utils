@@ -32,12 +32,15 @@ public  class ForwardingListener implements MqttCallback {
 
     private final  Object muxMessageDelivererSet = new Object();
     private Set<Topic> messageDelivererSet = new HashSet<>();
+    // set of topics where we publish
+    private Set<String> publishedTopics = new HashSet<>();
 
 
     //Start of code made for testing performance
     private final boolean VALIDATION_MODE;
     private final Deserializer deserializer;
     private final MessageValidator validator;
+    private boolean autoblacklisting;
     //End of code made for testing performance
 
     public ForwardingListener( Observer connectionListener, UUID originProtocol) {
@@ -72,6 +75,23 @@ public  class ForwardingListener implements MqttCallback {
         }
 
     }
+
+    public void addPublishedTopic(String topic){
+       // if(messageDelivererSet.stream().anyMatch(t -> t.equals(topic)))
+            publishedTopics.add(topic);
+    }
+    public void removePublishedTopic(String topic){
+        publishedTopics.remove(topic);
+    }
+
+    public boolean isAutoblacklisting() {
+        return autoblacklisting;
+    }
+
+    public void setAutoblacklisting(boolean autoblacklisting) {
+        this.autoblacklisting = autoblacklisting;
+    }
+
     @SuppressWarnings("SuspiciousMethodCalls")
     public boolean removeObserver(String topic, Observer listener){
         if(observables.containsKey(topic) && observables.get(topic).containsListener(listener))
@@ -113,6 +133,10 @@ public  class ForwardingListener implements MqttCallback {
     @Override
     public void messageArrived(String topic, org.eclipse.paho.client.mqttv3.MqttMessage mqttMessage) {
         LOG.debug("Message arrived in listener:" + topic);
+        if(autoblacklisting && publishedTopics.contains(topic)) {// if this topic had been used to published
+            // publishedTopics.remove(topic);
+            return;
+        }
 
         if(VALIDATION_MODE) toValidation(topic,mqttMessage.getPayload());
 

@@ -108,11 +108,13 @@ public class BrokerService implements Observer, Broker {
         }
     }
 
-    public void publish(String topic, byte[] payload, int qos, boolean retained) throws Exception {
+    public synchronized void publish(String topic, byte[] payload, int qos, boolean retained) throws Exception {
 
         if(!mqttClient.isConnected())
             _connect();
 
+        if(brokerConf.autoBlacklisting)
+            listener.addPublishedTopic(topic);
 
         mqttClient.publish(topic,payload, qos, retained);
 

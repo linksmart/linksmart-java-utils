@@ -43,6 +43,8 @@ public class BrokerConfiguration {
     protected int securePort = _securePort;
     // if the persistence is file base, otherwise is memory based
     protected boolean filePersistence = false;
+    // discard own messages
+    protected boolean autoBlacklisting = false;
     // default subscription quality of service I[0,2]
     protected int subQoS = 0;
     // default subscription quality of service I[0,2]
@@ -190,6 +192,7 @@ public class BrokerConfiguration {
             brokerConf.version =  MqttVersion.valueOf(getString(BrokerServiceConst.MQTT_VERSION, aux,  MqttVersion.DEFAULT.toString()));
             brokerConf.automaticReconnect = getBoolean(BrokerServiceConst.AUTOMATIC_RECONNECT,aux,  brokerConf.automaticReconnect);
             brokerConf.cleanSession = getBoolean(BrokerServiceConst.CLEAN_SESSION,aux,  brokerConf.cleanSession);
+            brokerConf.autoBlacklisting = getBoolean(BrokerServiceConst.AUTOBLACKLISTING,aux,  brokerConf.autoBlacklisting);
             if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)&& conf.containsKeyAnywhere(BrokerServiceConst.USER )) {
                 brokerConf.user = getString(BrokerServiceConst.USER, aux,  brokerConf.user);
                 brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux,  brokerConf.password);
@@ -234,7 +237,7 @@ public class BrokerConfiguration {
             brokerConf.cleanSession = reference.cleanSession;
             brokerConf.user = reference.user;
             brokerConf.password = reference.password;
-
+            brokerConf.autoBlacklisting = reference.autoBlacklisting;
 
             if (reference.secConf!=null) {
                 brokerConf.secConf = brokerConf.getInitSecurityConfiguration();
