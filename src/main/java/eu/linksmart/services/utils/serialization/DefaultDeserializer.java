@@ -7,6 +7,8 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import eu.linksmart.services.utils.configuration.Configurator;
+import eu.linksmart.services.utils.constants.Const;
 import eu.linksmart.services.utils.function.Utils;
 
 import java.io.IOException;
@@ -22,9 +24,13 @@ import java.util.Map;
  */
 public class DefaultDeserializer implements Deserializer{
     protected ObjectMapper mapper = new ObjectMapper();
+    protected Configurator conf = Configurator.getDefaultConfig();
     public DefaultDeserializer(){
         mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        if(conf !=null && conf.containsKeyAnywhere(Const.TIME_EPOCH_CONF_PATH))
+            mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, conf.getBoolean(Const.TIME_EPOCH_CONF_PATH));
+
         //mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         //mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);

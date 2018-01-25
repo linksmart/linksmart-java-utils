@@ -34,6 +34,7 @@ import java.security.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -81,7 +82,7 @@ public class  Utils {
             dateFormat= new SimpleDateFormat(Const.TIME_ISO_FORMAT_MS_TZ);
 
         else
-             dateFormat =new SimpleDateFormat(Configurator.getDefaultConfig().getString(Const.TIME_FORMAT_CONF_PATH) );
+             dateFormat =new SimpleDateFormat(Configurator.getDefaultConfig().getString(Const.TIME_FORMAT_CONF_PATH), Locale.ROOT );
 
         dateFormat.setTimeZone(tz);
 
@@ -89,6 +90,11 @@ public class  Utils {
 
     }
     static public Date formISO8601(String str) throws IOException {
+        try {
+            return getDateFormat().parse(str);
+        }catch (Exception e){
+            // nothing
+        }
         try {
             // doesn't uses T
             if (str.contains(" "))
