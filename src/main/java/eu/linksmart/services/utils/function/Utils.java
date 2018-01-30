@@ -47,7 +47,7 @@ import java.util.TimeZone;
  * */
 public class  Utils {
     static private DateFormat dateFormat = getDateFormat();
-    static private DateFormat
+    static public DateFormat
             isoFormatMSTZ = new SimpleDateFormat(Const.TIME_ISO_FORMAT_MS_TZ),
             isoFormatWMSTZ = new SimpleDateFormat(Const.TIME_ISO_FORMAT_WMS_TZ),
             isoFormatMSWTZ = new SimpleDateFormat(Const.TIME_ISO_FORMAT_MS_WTZ),
