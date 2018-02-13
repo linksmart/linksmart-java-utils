@@ -103,7 +103,7 @@ public class BrokerConfiguration {
     public static Map<String,BrokerConfiguration> loadConfigurations() throws UnknownError{
         try {
             if(!loaded) {
-                List aux = conf.getList(Const.BROKERS_ALIAS);
+                List aux = conf.getStringList(Const.BROKERS_ALIAS);
                 List<String> aliases = new ArrayList<>();
                 aliases.addAll(aux);
                 if (aliasBrokerConf.isEmpty() || !aliasBrokerConf.keySet().containsAll(aliases))
