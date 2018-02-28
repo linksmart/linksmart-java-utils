@@ -149,10 +149,10 @@ public class BrokerConfiguration {
 
           //  mqttOptions.setServerURIs();
           //  mqttOptions.setSSLProperties();
-            if(brokerConf.secConf!=null && !"".equals(brokerConf.secConf.CApath) && !"".equals(brokerConf.secConf.clientCertificatePath) && !"".equals(brokerConf.secConf.keyPath) ) {
+            if(brokerConf.secConf!=null && !"".equals(brokerConf.secConf.trustStorePath)  && !"".equals(brokerConf.secConf.keyStorePath) ) {
                 SSLSocketFactory socketFactory;
                 try {
-                    socketFactory = Utils.getSocketFactory(brokerConf.secConf.CApath, brokerConf.secConf.clientCertificatePath,brokerConf.secConf.keyPath, brokerConf.secConf.CAPassword,brokerConf.secConf.clientCertificatePassword,brokerConf.secConf.keyPassword);
+                    socketFactory = Utils.getSocketFactory( brokerConf.secConf.trustStorePath,brokerConf.secConf.keyStorePath,brokerConf.secConf.trustStorePassword,brokerConf.secConf.keyStorePassword);
                 } catch (Exception e) {
                     throw new InternalError(e);
                 }
@@ -200,12 +200,10 @@ public class BrokerConfiguration {
 
             if ((conf.containsKeyAnywhere(Const.CERTIFICATE_BASE_SECURITY) ||  conf.containsKeyAnywhere(Const.CERTIFICATE_BASE_SECURITY + aux))&& getBoolean(Const.CERTIFICATE_BASE_SECURITY, aux,  brokerConf.secConf != null)) {
                 brokerConf.secConf = brokerConf.getInitSecurityConfiguration();
-                brokerConf.secConf.CApath = getString(Const.CA_CERTIFICATE_PATH, aux,  brokerConf.secConf.CApath);
-                brokerConf.secConf.clientCertificatePath = getString(Const.CERTIFICATE_FILE_PATH, aux,  brokerConf.secConf.clientCertificatePath);
-                brokerConf.secConf.keyPath = getString(Const.KEY_FILE_PATH, aux,  brokerConf.secConf.keyPath);
-                brokerConf.secConf.CAPassword = getString(Const.CA_CERTIFICATE_PASSWORD, aux,  brokerConf.secConf.CAPassword);
-                brokerConf.secConf.clientCertificatePassword = getString(Const.CERTIFICATE_PASSWORD, aux,  brokerConf.secConf.clientCertificatePassword);
-                brokerConf.secConf.keyPassword = getString(Const.KEY_PASSWORD, aux,  brokerConf.secConf.keyPassword);
+                brokerConf.secConf.trustStorePath = getString(Const.TRUST_STORE_FILE_PATH, aux,  brokerConf.secConf.trustStorePath);
+                brokerConf.secConf.keyStorePath = getString(Const.KEY_STORE_FILE_PATH, aux,  brokerConf.secConf.keyStorePath);
+                brokerConf.secConf.trustStorePassword = getString(Const.CERTIFICATE_PASSWORD, aux,  brokerConf.secConf.trustStorePassword);
+                brokerConf.secConf.keyStorePassword = getString(Const.KEY_PASSWORD, aux,  brokerConf.secConf.keyStorePassword);
             }
 
             linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
@@ -241,12 +239,10 @@ public class BrokerConfiguration {
 
             if (reference.secConf!=null) {
                 brokerConf.secConf = brokerConf.getInitSecurityConfiguration();
-                brokerConf.secConf.CApath = reference.secConf.CApath;
-                brokerConf.secConf.clientCertificatePath = reference.secConf.clientCertificatePath;
-                brokerConf.secConf.keyPath = reference.secConf.keyPath;
-                brokerConf.secConf.CAPassword = reference.secConf.CAPassword;
-                brokerConf.secConf.clientCertificatePassword = reference.secConf.clientCertificatePassword;
-                brokerConf.secConf.keyPassword = reference.secConf.keyPassword;
+                brokerConf.secConf.trustStorePath = reference.secConf.trustStorePath;
+                brokerConf.secConf.keyStorePath = reference.secConf.keyStorePath;
+                brokerConf.secConf.trustStorePassword = reference.secConf.trustStorePassword;
+                brokerConf.secConf.keyStorePassword = reference.secConf.keyStorePassword;
             }else
                 brokerConf.secConf = null;
             linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
@@ -283,7 +279,7 @@ public class BrokerConfiguration {
                     brokerConfiguration.hostname = url.getHost();
                 }
                 if(secureProtocols.contains(url.getScheme())){
-                    brokerConfiguration.port = url.getPort();
+                    brokerConfiguration.securePort = url.getPort();
                     brokerConfiguration.hostname = url.getHost();
 
                 }
@@ -595,69 +591,19 @@ public class BrokerConfiguration {
     }
 
     public class BrokerSecurityConfiguration{
-        protected String CApath = "";
 
-        protected String CAPassword = "";
+        protected String trustStorePath = "";
 
-        protected String clientCertificatePath = "";
+        protected String trustStorePassword = "";
 
-        protected String clientCertificatePassword = "";
+        protected String keyStorePath = "";
 
-        protected String keyPath = "";
-
-        protected String keyPassword = "";
+        protected String keyStorePassword = "";
 
         protected BrokerSecurityConfiguration(){
             // nothing
         }
 
-        public String getCApath() {
-            return CApath;
-        }
-
-        public String getCAPassword() {
-            return CAPassword;
-        }
-
-        public String getClientCertificatePath() {
-            return clientCertificatePath;
-        }
-
-        public String getClientCertificatePassword() {
-            return clientCertificatePassword;
-        }
-
-        public String getKeyPath() {
-            return keyPath;
-        }
-
-        public String getKeyPassword() {
-            return keyPassword;
-        }
-
-        public void setCApath(String CApath) {
-            this.CApath = CApath;
-        }
-
-        public void setCAPassword(String CAPassword) {
-            this.CAPassword = CAPassword;
-        }
-
-        public void setClientCertificatePath(String clientCertificatePath) {
-            this.clientCertificatePath = clientCertificatePath;
-        }
-
-        public void setClientCertificatePassword(String clientCertificatePassword) {
-            this.clientCertificatePassword = clientCertificatePassword;
-        }
-
-        public void setKeyPath(String keyPath) {
-            this.keyPath = keyPath;
-        }
-
-        public void setKeyPassword(String keyPassword) {
-            this.keyPassword = keyPassword;
-        }
         @Override
         public boolean equals(Object o){
 
@@ -665,7 +611,7 @@ public class BrokerConfiguration {
                 return true;
             if(o!=null && o instanceof BrokerSecurityConfiguration ) {
                 BrokerSecurityConfiguration aux = (BrokerSecurityConfiguration)o;
-                return aux.CApath.equals(CApath)  && aux.CAPassword.equals(CAPassword) && aux.clientCertificatePath.equals(clientCertificatePath) && aux.clientCertificatePassword.equals(clientCertificatePassword) && aux.keyPath.equals(keyPath) && aux.keyPassword.equals(keyPassword);
+                return  aux.trustStorePath.equals(trustStorePath) && aux.trustStorePassword.equals(trustStorePassword) && aux.keyStorePath.equals(keyStorePath) && aux.keyStorePassword.equals(keyStorePassword);
             }
             return false;
 
@@ -675,12 +621,10 @@ public class BrokerConfiguration {
         public String toString(){
 
             return "{" +
-                    "\"CApath\":\""+CApath+"\"," +
-                    "\"CAPassword\":\""+CAPassword+"\"," +
-                    "\"clientCertificatePath\":\""+clientCertificatePath+"\"," +
-                    "\"clientCertificatePassword\":\""+clientCertificatePassword+"\"," +
-                    "\"keyPath\":\""+keyPath+"\"," +
-                    "\"keyPassword\":\""+keyPassword+"\"" +
+                    "\"clientCertificatePath\":\""+trustStorePath+"\"," +
+                    "\"clientCertificatePassword\":\""+trustStorePassword+"\"," +
+                    "\"keyPath\":\""+keyStorePath+"\"," +
+                    "\"keyPassword\":\""+keyStorePassword+"\"" +
                     "}";
 
         }

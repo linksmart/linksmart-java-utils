@@ -241,36 +241,34 @@ public class  Utils {
     // TODO: No Unit test
     /**
      * Provide a quick method to construct a SSLSocketFactory which is a TCP socket using TLS/SSL
-     * @param caCrtFile location of the CA certificate
-     * @param crtFile location of the client certificate
-     * @param keyFile location of the key file
-     * @param caPassword password to access the CA certificate file
-     * @param crtPassword password to access the client certificate file
-     * @param keyPassword password to access the key file
+     * @param trustStore location of the trust store
+     * @param keyStore location of the key store
+     * @param trustStorePassword password to access the trust store
+     * @param keyStorePassword password to access the key store
      * @return the SSLSocketFactory to create secure sockets with the provided certificates infrastructure
      * @exception java.lang.Exception in case of something wrong happens
      * */
-    static public SSLSocketFactory getSocketFactory (final String caCrtFile, final String crtFile, final String keyFile, final String caPassword, final String crtPassword, final String keyPassword) throws Exception
+    static public SSLSocketFactory getSocketFactory ( final String trustStore, final String keyStore, final String trustStorePassword, final String keyStorePassword) throws Exception
     {
 
         // todo check if the CA needs or can use the password
-        final FileInputStream crtStream = new FileInputStream(crtFile);
-        final FileInputStream keyStream = new FileInputStream(keyFile);
+        final FileInputStream trustStoreStream = new FileInputStream(trustStore);
+        final FileInputStream keyStoreStream = new FileInputStream(keyStore);
         // CA certificate is used to authenticate server
         final KeyStore caKs = KeyStore.getInstance("JKS");
-        caKs.load(crtStream, crtPassword.toCharArray());
+        caKs.load(trustStoreStream, trustStorePassword.toCharArray());
         final TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
         tmf.init(caKs);
 
-        crtStream.close();
+        trustStoreStream.close();
 
         // client key and certificates are sent to server so it can authenticate us
         final KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(keyStream, keyPassword.toCharArray());
+        ks.load(keyStoreStream, keyStorePassword.toCharArray());
         final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
-        kmf.init(ks, keyPassword.toCharArray());
+        kmf.init(ks, keyStorePassword.toCharArray());
 
-        keyStream.close();
+        keyStoreStream.close();
 
         // finally, create SSL socket factory
         final SSLContext context = SSLContext.getInstance("TLSv1.2");

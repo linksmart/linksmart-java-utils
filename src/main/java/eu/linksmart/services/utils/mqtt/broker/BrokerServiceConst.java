@@ -22,13 +22,11 @@ public interface BrokerServiceConst {
     String DEFAULT_SUBSCRIPTION_QoS ="messaging_client_mqtt_sub_qos";
     String CLEAN_SESSION = "messaging_client_mqtt_session_clean_enabled";
 
-    String CA_CERTIFICATE_PATH ="connection_broker_mqtt_security_caCertificatePath";
-    String CERTIFICATE_FILE_PATH ="connection_broker_mqtt_security_certificatePath";
-    String KEY_FILE_PATH ="connection_broker_mqtt_security_keyPath";
+    String TRUST_STORE_FILE_PATH ="connection_broker_mqtt_security_TrustStorePath";
+    String KEY_STORE_FILE_PATH ="connection_broker_mqtt_security_keySorePath";
     String CERTIFICATE_BASE_SECURITY ="connection_broker_mqtt_security_certificateBaseSecurityEnabled";
-    String CERTIFICATE_PASSWORD = "connection_broker_mqtt_security_certificatePassword";
-    String KEY_PASSWORD = "connection_broker_mqtt_security_keyPassword";
-    String CA_CERTIFICATE_PASSWORD = "connection_broker_mqtt_security_caCertificatePassword";
+    String CERTIFICATE_PASSWORD = "connection_broker_mqtt_security_trustStorePassword";
+    String KEY_PASSWORD = "connection_broker_mqtt_security_keyStorePassword";
 
 
     String MAX_IN_FLIGHT = "messaging_client_mqtt_maxInFlightMessages";
