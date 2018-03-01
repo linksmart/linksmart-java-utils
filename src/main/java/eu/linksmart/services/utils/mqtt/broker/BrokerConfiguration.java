@@ -15,6 +15,8 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.omg.CORBA.portable.UnknownException;
 import org.springframework.web.client.RestClientException;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import java.net.URI;
 import java.util.*;
@@ -78,7 +80,7 @@ public class BrokerConfiguration {
     // password of the user (above) for connecting to the broker
     private String password = null;
     // supported protocols
-    private static Set<String> protocols = new HashSet<>(Arrays.asList("tcp", "mqtt", "mqtt")), secureProtocols = new HashSet<>(Arrays.asList("tls", "ssl", "mqtts"));
+    private static Set<String> protocols = new HashSet<>(Arrays.asList("tcp", "mqtt")), secureProtocols = new HashSet<>(Arrays.asList("tls", "ssl", "mqtts"));
 
     static private boolean loaded =false;
     @JsonIgnore
@@ -147,9 +149,18 @@ public class BrokerConfiguration {
                 mqttOptions.setWill(brokerConf.willTopic, brokerConf.will.getBytes(),2,false);
 
 
-          //  mqttOptions.setServerURIs();
+          mqttOptions.setServerURIs( new String[]{brokerConf.getURL()} );
           //  mqttOptions.setSSLProperties();
-            if(brokerConf.secConf!=null && !"".equals(brokerConf.secConf.trustStorePath)  && !"".equals(brokerConf.secConf.keyStorePath) ) {
+            if(brokerConf.secConf!=null && brokerConf.secConf.acceptAllCerts) {
+                SSLSocketFactory socketFactory;
+                try {
+                    socketFactory = Utils.getSocketFactory();
+                    mqttOptions.setSSLHostnameVerifier((s, sslSession) -> true);
+                } catch (Exception e) {
+                    throw new InternalError(e);
+                }
+                mqttOptions.setSocketFactory(socketFactory);
+            }else if(brokerConf.secConf!=null && !"".equals(brokerConf.secConf.trustStorePath)  && !"".equals(brokerConf.secConf.keyStorePath) ) {
                 SSLSocketFactory socketFactory;
                 try {
                     socketFactory = Utils.getSocketFactory( brokerConf.secConf.trustStorePath,brokerConf.secConf.keyStorePath,brokerConf.secConf.trustStorePassword,brokerConf.secConf.keyStorePassword);
@@ -193,7 +204,7 @@ public class BrokerConfiguration {
             brokerConf.automaticReconnect = getBoolean(BrokerServiceConst.AUTOMATIC_RECONNECT,aux,  brokerConf.automaticReconnect);
             brokerConf.cleanSession = getBoolean(BrokerServiceConst.CLEAN_SESSION,aux,  brokerConf.cleanSession);
             brokerConf.autoBlacklisting = getBoolean(BrokerServiceConst.AUTOBLACKLISTING,aux,  brokerConf.autoBlacklisting);
-            if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)&& conf.containsKeyAnywhere(BrokerServiceConst.USER )) {
+            if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)|| conf.containsKeyAnywhere(BrokerServiceConst.USER )) {
                 brokerConf.user = getString(BrokerServiceConst.USER, aux,  brokerConf.user);
                 brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux,  brokerConf.password);
             }
@@ -204,6 +215,7 @@ public class BrokerConfiguration {
                 brokerConf.secConf.keyStorePath = getString(Const.KEY_STORE_FILE_PATH, aux,  brokerConf.secConf.keyStorePath);
                 brokerConf.secConf.trustStorePassword = getString(Const.CERTIFICATE_PASSWORD, aux,  brokerConf.secConf.trustStorePassword);
                 brokerConf.secConf.keyStorePassword = getString(Const.KEY_PASSWORD, aux,  brokerConf.secConf.keyStorePassword);
+                brokerConf.secConf.acceptAllCerts =  getBoolean(Const.ACCEPT_ALL_CERTIFICATES, aux,  brokerConf.secConf.acceptAllCerts);
             }
 
             linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
@@ -243,6 +255,7 @@ public class BrokerConfiguration {
                 brokerConf.secConf.keyStorePath = reference.secConf.keyStorePath;
                 brokerConf.secConf.trustStorePassword = reference.secConf.trustStorePassword;
                 brokerConf.secConf.keyStorePassword = reference.secConf.keyStorePassword;
+                brokerConf.secConf.acceptAllCerts = reference.secConf.acceptAllCerts;
             }else
                 brokerConf.secConf = null;
             linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
@@ -600,6 +613,8 @@ public class BrokerConfiguration {
 
         protected String keyStorePassword = "";
 
+        protected Boolean acceptAllCerts = false;
+
         protected BrokerSecurityConfiguration(){
             // nothing
         }
@@ -624,7 +639,8 @@ public class BrokerConfiguration {
                     "\"clientCertificatePath\":\""+trustStorePath+"\"," +
                     "\"clientCertificatePassword\":\""+trustStorePassword+"\"," +
                     "\"keyPath\":\""+keyStorePath+"\"," +
-                    "\"keyPassword\":\""+keyStorePassword+"\"" +
+                    "\"keyPassword\":\""+keyStorePassword+"\"," +
+                    "\"acceptAllCert\":"+String.valueOf(acceptAllCerts)+"" +
                     "}";
 
         }

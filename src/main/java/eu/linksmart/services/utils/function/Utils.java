@@ -21,22 +21,24 @@ package eu.linksmart.services.utils.function;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
+import sun.security.util.DerInputStream;
+import sun.security.util.DerValue;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.*;
+import java.security.cert.CertificateFactory;
+import java.security.cert.Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateCrtKeySpec;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Provide a set of commonly needed functions. The idea of this Utility class is to centralized all code is used everyplace but not belongs specially in any place.
@@ -172,6 +174,7 @@ public class  Utils {
         }
         return new BigInteger(1,SHA256.digest((string).getBytes())).toString(16);
     }
+
     // TODO: please remove in version 1.3.0+
  /*   *//*
      * Provide a default method and unique method to get the logging service regardless of the implementation. Additionally, for the reloading of the logging  configuration
@@ -277,6 +280,51 @@ public class  Utils {
         return context.getSocketFactory();
     }
     /**
+     * Provide a quick method to construct a SSLSocketFactory which is a TCP socket using TLS/SSL
+     * @param caPem
+     * @param clientCertPem
+     * @param clientKeyPem
+     * @param clientCertPass
+     * @param clientKeyPass
+     * @return the SSLSocketFactory to create secure sockets with the provided certificates infrastructure
+     * @exception java.lang.Exception in case of something wrong happens
+     * */
+    static public SSLSocketFactory getSocketFactory ( final String caPem, final String clientCertPem, final String clientKeyPem, String clientCertPass, String clientKeyPass) throws Exception
+    {
+        String pass = UUID.randomUUID().toString();
+        final TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
+        tmf.init(getTrustStore(caPem,pass));
+
+        final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
+        tmf.init(getKeyStore(clientCertPem,clientKeyPem,caPem,pass));
+
+
+        // finally, create SSL socket factory
+        final SSLContext context = SSLContext.getInstance("TLSv1.2");
+        context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+        return context.getSocketFactory();
+    }
+    /**
+     * Returns a SSL Factory instance that accepts all server certificates.
+     * <pre>SSLSocket sock =
+     *     (SSLSocket) getSocketFactory.createSocket ; </pre>
+     * @return  An SSL-specific socket factory.
+     **/
+    public static final SSLSocketFactory getSocketFactory() throws KeyManagementException, NoSuchAlgorithmException {
+        SSLSocketFactory sslSocketFactory;
+
+                TrustManager[] tm = new TrustManager[] { new NaiveTrustManager() };
+                SSLContext context = SSLContext.getInstance ("TLS");
+                context.init( new KeyManager[0], tm, new SecureRandom( ) );
+
+                sslSocketFactory =  context.getSocketFactory ();
+
+
+
+        return sslSocketFactory;
+    }
+    /**
      * Provide a quick method to find out if file exists (in the filesystem or as JAR resource)
      * @param filename the name of the file to check
      * @return true if the file exists
@@ -353,6 +401,107 @@ public class  Utils {
             return false;
         }
         return true;
+    }
+
+    private static KeyStore getKeyStore(String clientCertPem, String privateKeyPem, String caPem, String password) throws IOException{
+        try {
+            Certificate clientCertificate = loadCertificate(clientCertPem);
+            PrivateKey privateKey = loadPrivateKey(privateKeyPem);
+            Certificate caCertificate = loadCertificate(caPem);
+
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca-cert", caCertificate);
+            keyStore.setCertificateEntry("client-cert", clientCertificate);
+            keyStore.setKeyEntry("client-key", privateKey, password.toCharArray(), new Certificate[]{clientCertificate});
+            return keyStore;
+        } catch (GeneralSecurityException | IOException e) {
+            throw new IOException("Cannot build keystore", e);
+        }
+    }
+    private static KeyStore getTrustStore(String caPem, String password) throws IOException{
+        try {
+            Certificate caCertificate = loadCertificate(caPem);
+
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca-cert", caCertificate);
+            return keyStore;
+        } catch (GeneralSecurityException | IOException e) {
+            throw new IOException("Cannot build keystore", e);
+        }
+    }
+
+    private static Certificate loadCertificate(String certificatePem) throws IOException, GeneralSecurityException {
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
+        final byte[] content = readPemContent(certificatePem);
+        return certificateFactory.generateCertificate(new ByteArrayInputStream(content));
+    }
+
+    private static PrivateKey loadPrivateKey(String privateKeyPem) throws IOException, GeneralSecurityException {
+        return pemLoadPrivateKeyPkcs1OrPkcs8Encoded(privateKeyPem);
+    }
+
+    private static byte[] readPemContent(String pem) throws IOException {
+        final byte[] content;
+        try (PemReader pemReader = new PemReader(new StringReader(pem))) {
+            final PemObject pemObject = pemReader.readPemObject();
+            content = pemObject.getContent();
+        }
+        return content;
+    }
+
+    private static PrivateKey pemLoadPrivateKeyPkcs1OrPkcs8Encoded(
+            String privateKeyPem) throws GeneralSecurityException, IOException {
+        // PKCS#8 format
+        final String PEM_PRIVATE_START = "-----BEGIN PRIVATE KEY-----";
+        final String PEM_PRIVATE_END = "-----END PRIVATE KEY-----";
+
+        // PKCS#1 format
+        final String PEM_RSA_PRIVATE_START = "-----BEGIN RSA PRIVATE KEY-----";
+        final String PEM_RSA_PRIVATE_END = "-----END RSA PRIVATE KEY-----";
+
+        if (privateKeyPem.contains(PEM_PRIVATE_START)) { // PKCS#8 format
+            privateKeyPem = privateKeyPem.replace(PEM_PRIVATE_START, "").replace(PEM_PRIVATE_END, "");
+            privateKeyPem = privateKeyPem.replaceAll("\\s", "");
+
+            byte[] pkcs8EncodedKey = Base64.getDecoder().decode(privateKeyPem);
+
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            return factory.generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedKey));
+
+        } else if (privateKeyPem.contains(PEM_RSA_PRIVATE_START)) {  // PKCS#1 format
+
+            privateKeyPem = privateKeyPem.replace(PEM_RSA_PRIVATE_START, "").replace(PEM_RSA_PRIVATE_END, "");
+            privateKeyPem = privateKeyPem.replaceAll("\\s", "");
+
+            DerInputStream derReader = new DerInputStream(Base64.getDecoder().decode(privateKeyPem));
+
+            DerValue[] seq = derReader.getSequence(0);
+
+            if (seq.length < 9) {
+                throw new GeneralSecurityException("Could not parse a PKCS1 private key.");
+            }
+
+            // skip version seq[0];
+            BigInteger modulus = seq[1].getBigInteger();
+            BigInteger publicExp = seq[2].getBigInteger();
+            BigInteger privateExp = seq[3].getBigInteger();
+            BigInteger prime1 = seq[4].getBigInteger();
+            BigInteger prime2 = seq[5].getBigInteger();
+            BigInteger exp1 = seq[6].getBigInteger();
+            BigInteger exp2 = seq[7].getBigInteger();
+            BigInteger crtCoef = seq[8].getBigInteger();
+
+            RSAPrivateCrtKeySpec keySpec = new RSAPrivateCrtKeySpec(modulus, publicExp, privateExp, prime1, prime2,
+                    exp1, exp2, crtCoef);
+
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+
+            return factory.generatePrivate(keySpec);
+        }
+
+        throw new GeneralSecurityException("Not supported format of a private key");
     }
 
 }
