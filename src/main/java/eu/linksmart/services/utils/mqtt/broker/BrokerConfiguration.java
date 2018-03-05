@@ -650,6 +650,45 @@ public class BrokerConfiguration {
             return toString().hashCode();
         }
 
+        public String getTrustStorePath() {
+            return trustStorePath;
+        }
+
+        public void setTrustStorePath(String trustStorePath) {
+            this.trustStorePath = trustStorePath;
+        }
+
+        public String getTrustStorePassword() {
+            return trustStorePassword;
+        }
+
+        public void setTrustStorePassword(String trustStorePassword) {
+            this.trustStorePassword = trustStorePassword;
+        }
+
+        public String getKeyStorePath() {
+            return keyStorePath;
+        }
+
+        public void setKeyStorePath(String keyStorePath) {
+            this.keyStorePath = keyStorePath;
+        }
+
+        public String getKeyStorePassword() {
+            return keyStorePassword;
+        }
+
+        public void setKeyStorePassword(String keyStorePassword) {
+            this.keyStorePassword = keyStorePassword;
+        }
+
+        public Boolean getAcceptAllCerts() {
+            return acceptAllCerts;
+        }
+
+        public void setAcceptAllCerts(Boolean acceptAllCerts) {
+            this.acceptAllCerts = acceptAllCerts;
+        }
     }
     public enum  MqttVersion{
         DEFAULT, V3,V3_1,V3_1_1
