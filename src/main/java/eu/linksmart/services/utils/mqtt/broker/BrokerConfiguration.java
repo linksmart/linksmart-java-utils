@@ -425,7 +425,7 @@ public class BrokerConfiguration {
 
     public String getURL(){
         if(secConf!=null)
-            return Broker.getSecureBrokerURL(hostname,port);
+            return Broker.getSecureBrokerURL(hostname,securePort);
 
         return Broker.getBrokerURL(hostname, port);
     }
