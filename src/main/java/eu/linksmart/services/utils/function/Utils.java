@@ -21,6 +21,7 @@ package eu.linksmart.services.utils.function;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
+import org.apache.logging.log4j.LogManager;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import sun.security.util.DerInputStream;
@@ -39,6 +40,7 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Provide a set of commonly needed functions. The idea of this Utility class is to centralized all code is used everyplace but not belongs specially in any place.
@@ -376,6 +378,29 @@ public class  Utils {
             properties.load(Utils.class.getClassLoader().getResourceAsStream(source));
 
         return properties;
+    }
+    public static String runGetLastOutput(String[] cmd, String moduleName, Logger loggerService) throws IOException {
+        Process proc = Runtime.getRuntime().exec(cmd);
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+        String readLine = stdInput.readLine();
+
+        new Thread(() -> {
+            String s = null;
+            try {
+                while ((s = stdInput.readLine()) != null) {
+                    loggerService.info(moduleName+": {}", s);
+                }
+                // errors
+                while ((s = stdError.readLine()) != null) {
+                    loggerService.error(moduleName+": {}", s);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        return readLine;
     }
     /**
      *
