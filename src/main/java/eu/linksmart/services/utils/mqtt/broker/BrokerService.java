@@ -16,7 +16,7 @@ public class BrokerService implements Observer, Broker {
     protected transient static Logger loggerService = LogManager.getLogger(BrokerService.class);
     // this is the MQTT client to broker in the local broker
     private transient Configurator conf = Configurator.getDefaultConfig();
-    transient MqttClient mqttClient;
+    protected final transient MqttClient mqttClient;
     transient ForwardingListener listener;
     private transient List<Observer> connectionListener = new ArrayList<>();
 
@@ -34,6 +34,7 @@ public class BrokerService implements Observer, Broker {
         brokerConf.setWillTopic(topicWill);
         listener = new ForwardingListener(this,ID);
 
+        mqttClient = brokerConf.initClient();
         createClient();
 
     }
@@ -96,7 +97,6 @@ public class BrokerService implements Observer, Broker {
 
     public void createClient() throws MqttException {
 
-        mqttClient = brokerConf.initClient();
 
         mqttClient.setCallback(listener);
         try {
@@ -243,37 +243,99 @@ public class BrokerService implements Observer, Broker {
 
     private synchronized void subscribeAll() throws MqttException {
         loggerService.info( "(re)subscribing to: "+ topics.stream().collect(Collectors.joining(",")));
+
         mqttClient.subscribe(topics.toArray(new String[topics.size()]), ArrayUtils.toPrimitive(qoss.toArray(new Integer[qoss.size()])));
 
     }
 
     @Override
-    public void update(Observable o, Object arg) {
+    public synchronized void update(Observable o, Object arg) {
+        boolean wait = false;
+        do {
+            try {
+                Thread.sleep(brokerConf.getReconnectWaitingTime());
+                wait =true;
+            } catch (InterruptedException ex) {
+                //nothing
+            }
+        }while (!wait);
+        loggerService.warn("Disconnection of the client with id: " + brokerConf.getId() + " and alias: " + brokerConf.getAlias() + " with conf: " + brokerConf.toString());
+        reconnectingLoop(o, arg);
+        resubscribingLoop(o, arg);
+        informingLoop(o, arg);
 
-                loggerService.warn("Disconnection of the client with id: " + brokerConf.getId() + " and alias: " + brokerConf.getAlias() + " with conf: " + brokerConf.toString());
-                for(int i=0; i<brokerConf.getNoTries() && !mqttClient.isConnected();i++){
-                    try {
-                        loggerService.info("Reconnecting...");
-                        _connect();
+        if (!isConnected())
+            System.exit(-1);
 
-                        subscribeAll();
-
-                        if(connectionListener.size()>1)
-                            connectionListener.stream().parallel().forEach(l->l.update(null, arg));
-                        else
-                            connectionListener.forEach(l->l.update(null,arg));
-
-                    } catch (Exception e) {
-                        try {
-                            Thread.sleep(brokerConf.getReconnectWaitingTime());
-                        } catch (InterruptedException ex) {
-                            loggerService.error(ex.getMessage(), ex);
-                        }
-                        loggerService.error(e.getMessage(), e);
-                    }
-
+    }
+    private void reconnectingLoop(Observable o, Object arg){
+        boolean fail = true;
+        for(int i=0; i<brokerConf.getNoTries() && !mqttClient.isConnected();i++) {
+            try {
+                if(!mqttClient.isConnected()) {
+                    _connect();
                 }
+                fail = false;
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(brokerConf.getReconnectWaitingTime() * i);
+                } catch (InterruptedException ex) {
+                    loggerService.error(ex.getMessage(), ex);
+                }
+                loggerService.error(e.getMessage(), e);
+            }
+        }
+        if(fail && !mqttClient.isConnected()) {
+            loggerService.error("System unable to reconnect");
+            System.exit(-1);
+        }
+    }
+    private void resubscribingLoop(Observable o, Object arg){
+        boolean fail = true;
+        for(int i=0; i<brokerConf.getNoTries() && mqttClient.isConnected();i++){
+            try {
+                loggerService.info("Resubscribing...");
+                subscribeAll();
+                fail = false;
 
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(brokerConf.getReconnectWaitingTime()*i);
+                } catch (InterruptedException ex) {
+                    loggerService.error(ex.getMessage(), ex);
+                }
+                loggerService.error(e.getMessage(), e);
+            }
+        }
+        if(fail) {
+            loggerService.error("System unable to resubscribe");
+            System.exit(-1);
+        }
+    }
+    private void informingLoop(Observable o, Object arg){
+        boolean fail = true;
+        for(int i=0; i<brokerConf.getNoTries() && mqttClient.isConnected();i++){
+           try {
+                loggerService.info("Informing...");
+                if(connectionListener.size()>1)
+                    connectionListener.stream().parallel().forEach(l->l.update(null, arg));
+                else
+                    connectionListener.forEach(l->l.update(null,arg));
+               fail = false;
+
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(brokerConf.getReconnectWaitingTime()*i);
+                } catch (InterruptedException ex) {
+                    loggerService.error(ex.getMessage(), ex);
+                }
+                loggerService.error(e.getMessage(), e);
+            }
+        }
+        if(fail) {
+            loggerService.error("System unable to resubscribe");
+            System.exit(-1);
+        }
     }
 
     @Override
