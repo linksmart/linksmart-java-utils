@@ -15,8 +15,6 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.omg.CORBA.portable.UnknownException;
 import org.springframework.web.client.RestClientException;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import java.net.URI;
 import java.util.*;
@@ -80,8 +78,9 @@ public class BrokerConfiguration {
     // password of the user (above) for connecting to the broker
     private String password = null;
     // supported protocols
-
     protected Boolean acceptAllCerts = false;
+    // basic broker needed
+    private final static Set<String> BASIC_BROKERS = new HashSet<>(Arrays.asList("control","incoming","outgoing","linksmart","main_broker"));
 
     protected Boolean tls = false;
     private static Set<String> protocols = new HashSet<>(Arrays.asList("tcp", "mqtt")), secureProtocols = new HashSet<>(Arrays.asList("tls", "ssl", "mqtts"));
@@ -109,6 +108,8 @@ public class BrokerConfiguration {
     public static Map<String,BrokerConfiguration> loadConfigurations() throws UnknownError{
         try {
             if(!loaded) {
+                //if(aliasBrokerConf.isEmpty())
+
                 List aux = conf.getStringList(Const.BROKERS_ALIAS);
                 List<String> aliases = new ArrayList<>();
                 aliases.addAll(aux);
@@ -119,11 +120,17 @@ public class BrokerConfiguration {
             return aliasBrokerConf;
         }catch (Exception e){
             throw new UnknownError(e.getMessage());
+        }finally {
+
+            if(!aliasBrokerConf.keySet().containsAll(BASIC_BROKERS))
+                BASIC_BROKERS.forEach(i -> aliasBrokerConf.putIfAbsent(i, loadConfiguration(i)));
         }
 
 
     }
-
+    static public Set<String> knownBrokers(){
+            return loadConfigurations().keySet();
+    }
     static public void put(String alias,BrokerConfiguration brokerConfiguration){
         aliasBrokerConf.putIfAbsent(alias,brokerConfiguration);
     }
