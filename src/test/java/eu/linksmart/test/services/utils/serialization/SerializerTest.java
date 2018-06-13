@@ -21,8 +21,8 @@ public class SerializerTest {
     public void serializerTest(){
         Map mapS, mapB;
         String serialized;
-        Deserializer deserializer = new DefaultDeserializer();
-        Serializer serializer = new DefaultSerializer();
+        Deserializer deserializer = new DefaultSerializerDeserializer();
+        Serializer serializer = (Serializer) deserializer;
         try {
             mapS = deserializer.parse(simpleStrTest,Map.class);
             mapB = deserializer.deserialize(simpleBinTest, Map.class);
@@ -63,7 +63,7 @@ public class SerializerTest {
             Map<String,String> original = new Hashtable<>(), parsed;
             original.put("test","ok");
 
-            JWSSerializer serializer = new JWSSerializer(new DefaultSerializer());
+            JWSSerializer serializer = new JWSSerializer(new DefaultSerializerDeserializer());
             Deserializer deserializer = new JWSDeserializer(Base64.getEncoder().encodeToString(serializer.getPublicKey().getEncoded()));
 
             String serialized = serializer.toString(original);
