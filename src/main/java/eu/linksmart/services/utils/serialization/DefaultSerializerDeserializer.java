@@ -35,7 +35,7 @@ public class DefaultSerializerDeserializer  implements SerializerDeserializer, D
             parser.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, conf.getBoolean(Const.TIME_EPOCH_CONF_PATH));
 
         //parser.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        //parser.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        parser.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         parser.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         parser.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         parser.setDateFormat(Utils.getDateFormat());
