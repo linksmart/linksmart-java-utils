@@ -292,7 +292,7 @@ public class BrokerService implements Observer, Broker {
     }
     private void resubscribingLoop(Observable o, Object arg){
         boolean fail = true;
-        for(int i=0; i<brokerConf.getNoTries() && mqttClient.isConnected();i++){
+        for(int i=0; !mqttClient.isConnected() && i<brokerConf.getNoTries() ;i++){
             try {
                 loggerService.info("Resubscribing...");
                 subscribeAll();
@@ -306,6 +306,12 @@ public class BrokerService implements Observer, Broker {
                 }
                 loggerService.error(e.getMessage(), e);
             }
+            if(!mqttClient.isConnected())
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    loggerService.error(ex.getMessage(), ex);
+                }
         }
         if(fail) {
             loggerService.error("System unable to resubscribe");
