@@ -272,7 +272,7 @@ public class BrokerConfiguration {
                 brokerConf.secConf.keyStorePassword = reference.secConf.keyStorePassword;
             }else
                 brokerConf.secConf = null;
-            linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
+            linksmartServiceCatalogOverwrite(brokerConf, reference.alias);
 
             if(reference.equals(brokerConf))
                 brokerConf.realProfile = reference.realProfile;
