@@ -231,7 +231,7 @@ public class BrokerConfiguration {
                 brokerConf.secConf.keyStorePassword = getString(Const.KEY_PASSWORD, aux,  brokerConf.secConf.keyStorePassword);
             }
 
-            linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
+            linksmartServiceCatalogOverwrite(brokerConf, alias);
 
             return brokerConf;
         }catch (Exception e){
