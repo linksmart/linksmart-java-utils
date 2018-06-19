@@ -289,7 +289,7 @@ public class BrokerConfiguration {
                 Service service =null;
                 try{
                     service =SCclient.idGet(alias);
-                }catch (RestClientException e){
+                }catch (Exception e){
                     if(_defaultSet)
                         return brokerConfiguration;
                     service = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
