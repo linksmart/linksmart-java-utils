@@ -26,12 +26,13 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class BrokerConfiguration {
     private static final String SC_API_NAME = "MQTT";
+    private static Service defBrokerRegService =null;
     // id of the configuration
     protected String id = UUID.randomUUID().toString();
     // alias (human readable) name of the broker
     protected String alias = "default", realProfile = "default";
     // the default config is set
-    private static boolean _defaultSet = false;
+   // private static boolean _defaultSet = false;
     // hostname or IP of the broker
     protected static String _hostname = "localhost";
     protected String hostname = _hostname;
@@ -286,27 +287,22 @@ public class BrokerConfiguration {
 
             if (SCclient != null ){
 
-                Service service =null;
+                defBrokerRegService =null;
                 try{
-                    service =SCclient.idGet(alias);
-                }catch (Exception e){
-                    if(_defaultSet)
-                        return brokerConfiguration;
-                    service = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
-                    _defaultSet = true;
-
+                    defBrokerRegService =SCclient.idGet(alias);
+                }catch (Exception e) {
+                    if (defBrokerRegService == null)
+                        defBrokerRegService = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
                 }
 
-                URI url = new URI(service.getApis().get(SC_API_NAME));
+                URI url = new URI(defBrokerRegService.getApis().get(SC_API_NAME));
 
                 brokerConfiguration.hostname = url.getHost();
                 if(protocols.contains(url.getScheme())) {
                     brokerConfiguration.port = url.getPort();
-                    brokerConfiguration.hostname = url.getHost();
                 }
                 if(secureProtocols.contains(url.getScheme())){
                     brokerConfiguration.securePort = url.getPort();
-                    brokerConfiguration.hostname = url.getHost();
 
                 }
 
