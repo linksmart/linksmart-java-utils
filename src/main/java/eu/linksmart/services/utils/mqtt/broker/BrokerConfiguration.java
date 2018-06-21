@@ -289,7 +289,10 @@ public class BrokerConfiguration {
 
                 defBrokerRegService =null;
                 try{
-                    defBrokerRegService =SCclient.idGet(alias);
+                    if ("".equals(alias))
+                        defBrokerRegService = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
+                    else
+                        defBrokerRegService =SCclient.idGet(alias);
                 }catch (Exception e) {
                     if (defBrokerRegService == null)
                         defBrokerRegService = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
