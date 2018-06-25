@@ -297,10 +297,12 @@ public class BrokerConfiguration {
                     if (defBrokerRegService == null)
                         defBrokerRegService = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
                 }
-
-                URI url = new URI(defBrokerRegService.getApis().get(SC_API_NAME));
-
-                brokerConfiguration.hostname = url.getHost();
+                // JDK-6587184 : Underline Problem in java.net.URI VM 1.6.0_01
+                // "fix" issue of '_' in uris
+                URI url = new URI(defBrokerRegService.getApis().get(SC_API_NAME).replace("--","-0-").replace("_","--"));
+                // JDK-6587184 : Underline Problem in java.net.URI VM 1.6.0_01
+                // "fix" issue of '_' in uris
+                brokerConfiguration.hostname = url.getHost().replace("--", "_").replace("-0-", "--");
                 if(protocols.contains(url.getScheme())) {
                     brokerConfiguration.port = url.getPort();
                 }
