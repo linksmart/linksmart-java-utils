@@ -516,7 +516,7 @@ public class BrokerConfiguration {
             return true;
         if (o!=null && o instanceof BrokerConfiguration) {
             BrokerConfiguration aux = (BrokerConfiguration) o;
-            boolean equal = aux.hostname.equals(hostname) && aux.securePort == securePort && aux.port == port && aux.filePersistence == filePersistence
+            boolean equal = aux.hostname!=null && aux.hostname.equals(hostname)  && aux.securePort == securePort && aux.port == port && aux.filePersistence == filePersistence
                     && aux.subQoS == subQoS && aux.pubQoS == pubQoS && aux.retainPolicy == retainPolicy && aux.keepAlive == keepAlive && aux.timeOut == timeOut && aux.noTries == noTries
                     && aux.reconnectWaitingTime == reconnectWaitingTime;
             if (equal && secConf != null)
