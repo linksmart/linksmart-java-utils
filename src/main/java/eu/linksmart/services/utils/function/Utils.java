@@ -21,6 +21,7 @@ package eu.linksmart.services.utils.function;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -31,6 +32,7 @@ import javax.net.ssl.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateFactory;
@@ -40,6 +42,8 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
+
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -92,6 +96,21 @@ public class  Utils {
 
         return dateFormat;
 
+    }
+    static public String getProtocol(String url) throws  Exception{
+
+        String[] aux = url.split("://");
+
+        return aux[0];
+    }
+    static public Pair<String,Integer> getHostnamePort(String url) throws  Exception{
+
+        // JDK-6587184 : Underline Problem in java.net.URI VM 1.6.0_01
+        // "fix" issue of '_' in uris
+        URI uri = new URI(url.replace("--","-0-").replace("_","--"));
+        // JDK-6587184 : Underline Problem in java.net.URI VM 1.6.0_01
+        // "fix" issue of '_' in uris
+        return Pair.of(uri.getHost(),uri.getPort());
     }
     static public Date formISO8601(String str) throws IOException {
         try {

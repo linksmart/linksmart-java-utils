@@ -7,6 +7,7 @@ import eu.linksmart.services.utils.function.Utils;
 import io.swagger.client.ApiClient;
 import io.swagger.client.api.ScApi;
 import io.swagger.client.model.Service;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -297,17 +298,13 @@ public class BrokerConfiguration {
                     if (defBrokerRegService == null)
                         defBrokerRegService = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
                 }
-                // JDK-6587184 : Underline Problem in java.net.URI VM 1.6.0_01
-                // "fix" issue of '_' in uris
-                URI url = new URI(defBrokerRegService.getApis().get(SC_API_NAME).replace("--","-0-").replace("_","--"));
-                // JDK-6587184 : Underline Problem in java.net.URI VM 1.6.0_01
-                // "fix" issue of '_' in uris
-                brokerConfiguration.hostname = url.getHost().replace("--", "_").replace("-0-", "--");
-                if(protocols.contains(url.getScheme())) {
-                    brokerConfiguration.port = url.getPort();
+                Pair<String, Integer> hostnamePort = Utils.getHostnamePort(defBrokerRegService.getApis().get(SC_API_NAME));
+                brokerConfiguration.hostname = hostnamePort.getKey();
+                if(protocols.contains(Utils.getProtocol(defBrokerRegService.getApis().get(SC_API_NAME)))) {
+                    brokerConfiguration.port = hostnamePort.getValue();
                 }
-                if(secureProtocols.contains(url.getScheme())){
-                    brokerConfiguration.securePort = url.getPort();
+                if(secureProtocols.contains(Utils.getProtocol(defBrokerRegService.getApis().get(SC_API_NAME)))){
+                    brokerConfiguration.securePort = hostnamePort.getValue();
 
                 }
 
