@@ -110,7 +110,7 @@ public class  Utils {
         URI uri = new URI(url.replace("--","-0-").replace("_","--"));
         // JDK-6587184 : Underline Problem in java.net.URI VM 1.6.0_01
         // "fix" issue of '_' in uris
-        return Pair.of(uri.getHost(),uri.getPort());
+        return Pair.of(uri.getHost().replace("--","_").replace("-0-","--"),uri.getPort());
     }
     static public Date formISO8601(String str) throws IOException {
         try {
