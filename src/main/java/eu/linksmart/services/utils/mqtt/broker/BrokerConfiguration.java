@@ -99,11 +99,7 @@ public class BrokerConfiguration {
     static private transient ScApi SCclient = null;
     static {
 
-        if(Utils.isRestAvailable(conf.getString(Const.LINKSMART_SERVICE_CATALOG_ENDPOINT))){
-            ApiClient apiClient = new ApiClient();
-            apiClient.setBasePath(conf.getString(Const.LINKSMART_SERVICE_CATALOG_ENDPOINT));
-            SCclient = new ScApi(apiClient);
-        }
+        SCclient = Utils.getServiceCatalogClient(conf.getString(Const.LINKSMART_SERVICE_CATALOG_ENDPOINT));
 
 
     }

@@ -21,6 +21,8 @@ package eu.linksmart.services.utils.function;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.constants.Const;
+import io.swagger.client.ApiClient;
+import io.swagger.client.api.ScApi;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -96,6 +98,14 @@ public class  Utils {
 
         return dateFormat;
 
+    }
+    public static ScApi getServiceCatalogClient(String uri){
+        if(Utils.isRestAvailable(uri)) {
+            ApiClient apiClient = new ApiClient();
+            apiClient.setBasePath(uri);
+            return new ScApi(apiClient);
+        }
+        return null;
     }
     static public String getProtocol(String url) throws  Exception{
 
