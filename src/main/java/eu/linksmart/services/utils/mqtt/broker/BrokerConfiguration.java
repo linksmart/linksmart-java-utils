@@ -13,7 +13,6 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
-import org.omg.CORBA.portable.UnknownException;
 import org.springframework.web.client.RestClientException;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -237,7 +236,7 @@ public class BrokerConfiguration {
     }
     static protected BrokerConfiguration loadConfiguration(BrokerConfiguration brokerConf,  BrokerConfiguration reference){
         if(reference == null)
-            throw  new UnknownException(new Exception("The provided broker configuration reference is not exists or it's null"));
+            throw  new UnknownError(("The provided broker configuration reference is not exists or it's null"));
         try {
             brokerConf.hostname = reference.hostname;
             brokerConf.port = reference.port;
