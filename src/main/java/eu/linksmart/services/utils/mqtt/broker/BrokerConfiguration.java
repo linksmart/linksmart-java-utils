@@ -214,9 +214,10 @@ public class BrokerConfiguration {
             brokerConf.autoBlacklisting = getBoolean(BrokerServiceConst.AUTOBLACKLISTING,aux,  brokerConf.autoBlacklisting);
             brokerConf.acceptAllCerts =  getBoolean(Const.ACCEPT_ALL_CERTIFICATES, aux,  brokerConf.acceptAllCerts);
             brokerConf.tls =  getBoolean(BrokerServiceConst.TLS_SOCKET, aux,  brokerConf.tls);
-            if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)|| conf.containsKeyAnywhere(BrokerServiceConst.USER )) {
-                brokerConf.user = getString(BrokerServiceConst.USER, aux,  brokerConf.user);
-                brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux,  brokerConf.password);
+            // no default pass/user (LS-290)
+            if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)) {
+                brokerConf.user = getString(BrokerServiceConst.USER, aux,  null);
+                brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux, null);
             }
 
             if ((conf.containsKeyAnywhere(Const.CERTIFICATE_BASE_SECURITY) ||  conf.containsKeyAnywhere(Const.CERTIFICATE_BASE_SECURITY + aux))&& getBoolean(Const.CERTIFICATE_BASE_SECURITY, aux,  brokerConf.secConf != null)) {
@@ -254,8 +255,9 @@ public class BrokerConfiguration {
             brokerConf.version = reference.version;
             brokerConf.automaticReconnect = reference.automaticReconnect;
             brokerConf.cleanSession = reference.cleanSession;
-            brokerConf.user = reference.user;
-            brokerConf.password = reference.password;
+            // no default pass/user (LS-290)
+            brokerConf.user = getString(Const.USER,reference.alias,null);
+            brokerConf.password = getString(reference.password, reference.alias,null);
             brokerConf.autoBlacklisting = reference.autoBlacklisting;
             brokerConf.acceptAllCerts = reference.acceptAllCerts;
             brokerConf.tls = reference.tls;
