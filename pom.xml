@@ -100,7 +100,7 @@
         <jackson.geojeson.version>1.6</jackson.geojeson.version>
         <java.junit.version>4.12</java.junit.version>
         <jjwt.version>3.2.0</jjwt.version>
-        <java.version>1.8</java.version>
+        <java.version>1.10</java.version>
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
         <maven.source.version>2.2.1</maven.source.version>
         <nimbus.jose.jwt>5.1</nimbus.jose.jwt>
