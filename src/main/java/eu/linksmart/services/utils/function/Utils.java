@@ -205,6 +205,15 @@ public class Utils {
         return getDateFormat().format(new Date());
     }
 
+    /**
+     * Provide a quick method to get a current time as String without TimeZone. This method gives a timestamp that is understood by GOST server.
+     *
+     * @return current Date as a String timestamp
+     */
+    static public String getDateNowWithoutTimeZone() {
+        return isoFormatMSWTZ.format(Date.from(java.time.Instant.now()));
+    }
+
     static boolean isLoggingConfLoaded = false;
 
     /**
