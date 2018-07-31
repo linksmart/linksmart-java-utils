@@ -239,6 +239,9 @@ public class BrokerConfiguration {
         if(reference == null)
             throw  new UnknownError(("The provided broker configuration reference is not exists or it's null"));
         try {
+
+            String aux = "".equals(reference.alias)|| reference.alias==null ? "":"_" + reference.alias;
+
             brokerConf.hostname = reference.hostname;
             brokerConf.port = reference.port;
             brokerConf.securePort = reference.securePort;
@@ -256,8 +259,8 @@ public class BrokerConfiguration {
             brokerConf.automaticReconnect = reference.automaticReconnect;
             brokerConf.cleanSession = reference.cleanSession;
             // no default pass/user (LS-290)
-            brokerConf.user = getString(Const.USER,reference.alias,null);
-            brokerConf.password = getString(reference.password, reference.alias,null);
+            brokerConf.user = getString(BrokerServiceConst.USER,aux,null);
+            brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux,null);
             brokerConf.autoBlacklisting = reference.autoBlacklisting;
             brokerConf.acceptAllCerts = reference.acceptAllCerts;
             brokerConf.tls = reference.tls;
