@@ -206,7 +206,12 @@ public class Configurator extends CombinedConfiguration {
 
     @Override
     public boolean getBoolean(String key) {
-        return get(key, Boolean.class);
+        Boolean re= get(key, Boolean.class);
+        if(re==null) {
+            System.err.println("Key "+key+" has value null o no value. The system then set the value false (null not possible value in boolean)");
+            re = false;
+        }
+        return re;
     }
 
     @Override
