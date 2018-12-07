@@ -40,4 +40,5 @@ public interface BrokerServiceConst {
 
     String ACCEPT_ALL_CERTIFICATES = "connection_broker_mqtt_security_acceptAllCert";
     String TLS_SOCKET = "connection_broker_mqtt_security_tls";
+    String USER_DEFAULT_CREDENTIALS ="messaging_client_mqtt_security_default_credentials";
 }

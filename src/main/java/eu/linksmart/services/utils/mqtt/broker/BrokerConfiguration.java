@@ -215,9 +215,19 @@ public class BrokerConfiguration {
             brokerConf.acceptAllCerts =  getBoolean(Const.ACCEPT_ALL_CERTIFICATES, aux,  brokerConf.acceptAllCerts);
             brokerConf.tls =  getBoolean(BrokerServiceConst.TLS_SOCKET, aux,  brokerConf.tls);
             // no default pass/user (LS-290)
-            if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)) {
-                brokerConf.user = getString(BrokerServiceConst.USER, aux,  null);
-                brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux, null);
+            if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)) { // checks if there is user specifically for this broker
+                brokerConf.user = conf.getString(BrokerServiceConst.USER,  null);
+                brokerConf.password = conf.getString(BrokerServiceConst.PASSWORD,  null);
+            } else if(conf.containsKeyAnywhere(BrokerServiceConst.USER_DEFAULT_CREDENTIALS + aux)) { // checks if this specific broker has the 'use global default user/pass' policy in case there is no user for this broker
+                if(conf.getBoolean(BrokerServiceConst.USER_DEFAULT_CREDENTIALS + aux)) { // if the specific broker policy is set to true, use global user/pass
+                    brokerConf.user = getString(BrokerServiceConst.USER, aux, null);
+                    brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux, null);
+                }
+            }else if(conf.containsKeyAnywhere(BrokerServiceConst.USER_DEFAULT_CREDENTIALS) ) { // if there is no specific broker policy, checks if there is a global 'use global default user/pass' policy in case there is no user for this broker
+                if(conf.getBoolean(BrokerServiceConst.USER_DEFAULT_CREDENTIALS)) { // if the general policy is set to true, use global user/pass
+                    brokerConf.user = getString(BrokerServiceConst.USER, aux, null);
+                    brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux, null);
+                }
             }
 
             if ((conf.containsKeyAnywhere(Const.CERTIFICATE_BASE_SECURITY) ||  conf.containsKeyAnywhere(Const.CERTIFICATE_BASE_SECURITY + aux))&& getBoolean(Const.CERTIFICATE_BASE_SECURITY, aux,  brokerConf.secConf != null)) {
