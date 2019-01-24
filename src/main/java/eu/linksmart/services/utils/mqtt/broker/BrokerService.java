@@ -291,7 +291,7 @@ public class BrokerService implements Observer, Broker {
         }
     }
     private void resubscribingLoop(Observable o, Object arg){
-        boolean fail = true;
+        boolean fail = !mqttClient.isConnected();
         for(int i=0; !mqttClient.isConnected() && i<brokerConf.getNoTries() ;i++){
             try {
                 loggerService.info("Resubscribing...");
