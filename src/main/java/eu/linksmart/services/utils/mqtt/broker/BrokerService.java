@@ -322,6 +322,7 @@ public class BrokerService implements Observer, Broker {
         boolean fail = true;
         for(int i=0; i<brokerConf.getNoTries() && mqttClient.isConnected();i++){
            try {
+                subscribeAll();
                 loggerService.info("Informing...");
                 if(connectionListener.size()>1)
                     connectionListener.stream().parallel().forEach(l->l.update(null, arg));
