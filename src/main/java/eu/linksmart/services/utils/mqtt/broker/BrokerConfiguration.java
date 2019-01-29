@@ -168,6 +168,15 @@ public class BrokerConfiguration {
                     throw new InternalError(e);
                 }
                 mqttOptions.setSocketFactory(socketFactory);
+            }else if(brokerConf.tls ) {
+                SSLSocketFactory socketFactory;
+                try {
+                    socketFactory = Utils.getSocketFactory();
+
+                } catch (Exception e) {
+                    throw new InternalError(e);
+                }
+                mqttOptions.setSocketFactory(socketFactory);
             }else if(brokerConf.secConf!=null && !"".equals(brokerConf.secConf.trustStorePath)  && !"".equals(brokerConf.secConf.keyStorePath) ) {
                 SSLSocketFactory socketFactory;
                 try {
@@ -445,7 +454,7 @@ public class BrokerConfiguration {
     }
 
     public String getURL(){
-        if(secConf!=null)
+        if(secConf!=null || this.tls)
             return Broker.getSecureBrokerURL(hostname,securePort);
 
         return Broker.getBrokerURL(hostname, port);
