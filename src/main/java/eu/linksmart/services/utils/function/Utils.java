@@ -578,5 +578,26 @@ public class Utils {
 
         throw new GeneralSecurityException("Not supported format of a private key");
     }
+    public static <T> T copyObject(T objSource) {
+        T objDest = null;
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(objSource);
+            oos.flush();
+            oos.close();
+            bos.close();
+            byte[] byteData = bos.toByteArray();
+            ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
+            try {
+                objDest = (T) new ObjectInputStream(bais).readObject();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return objDest;
 
+    }
 }
