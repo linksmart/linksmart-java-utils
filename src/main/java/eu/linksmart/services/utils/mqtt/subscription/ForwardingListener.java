@@ -33,14 +33,14 @@ public  class ForwardingListener implements MqttCallback {
     private final  Object muxMessageDelivererSet = new Object();
     private Set<Topic> messageDelivererSet = new HashSet<>();
     // set of topics where we publish
-    private Set<String> publishedTopics = new HashSet<>();
-
+    private static Set<String> publishedTopics = new HashSet<>();
+    // if true ignores messages sent by the same broker
+    private boolean autoblacklisting = true;
 
     //Start of code made for testing performance
     private final boolean VALIDATION_MODE;
     private final Deserializer deserializer;
     private final MessageValidator validator;
-    private boolean autoblacklisting;
     //End of code made for testing performance
 
     public ForwardingListener( Observer connectionListener, UUID originProtocol) {
@@ -76,7 +76,7 @@ public  class ForwardingListener implements MqttCallback {
 
     }
 
-    public void addPublishedTopic(String topic){
+    public static void addPublishedTopic(String topic){
        // if(messageDelivererSet.stream().anyMatch(t -> t.equals(topic)))
             publishedTopics.add(topic);
     }

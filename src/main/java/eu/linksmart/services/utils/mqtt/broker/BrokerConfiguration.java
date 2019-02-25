@@ -44,6 +44,7 @@ public class BrokerConfiguration {
     protected int securePort = _securePort;
     // if the persistence is file base, otherwise is memory based
     protected boolean filePersistence = false;
+
     // discard own messages
     protected boolean autoBlacklisting = false;
     // default subscription quality of service I[0,2]
@@ -640,6 +641,15 @@ public class BrokerConfiguration {
     public void setAcceptAllCerts(Boolean acceptAllCerts) {
         this.acceptAllCerts = acceptAllCerts;
     }
+
+    public boolean isAutoBlacklisting() {
+        return autoBlacklisting;
+    }
+
+    public void setAutoBlacklisting(boolean autoBlacklisting) {
+        this.autoBlacklisting = autoBlacklisting;
+    }
+
     public class BrokerSecurityConfiguration{
 
         protected String trustStorePath = "";

@@ -33,7 +33,7 @@ public class BrokerService implements Observer, Broker {
         brokerConf.setWill(will);
         brokerConf.setWillTopic(topicWill);
         listener = new ForwardingListener(this,ID);
-
+        listener.setAutoblacklisting(brokerConf.isAutoBlacklisting());
         mqttClient = brokerConf.initClient();
         createClient();
 
@@ -113,8 +113,7 @@ public class BrokerService implements Observer, Broker {
         if(!mqttClient.isConnected())
             _connect();
 
-        if(brokerConf.autoBlacklisting)
-            listener.addPublishedTopic(topic);
+        ForwardingListener.addPublishedTopic(topic);
 
         mqttClient.publish(topic,payload, qos, retained);
 
