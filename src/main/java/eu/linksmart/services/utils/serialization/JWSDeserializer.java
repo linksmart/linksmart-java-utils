@@ -28,7 +28,7 @@ public class JWSDeserializer implements Deserializer {
     private final String myInstance = UUID.randomUUID().toString();
 
     public JWSDeserializer() {
-        deserializer = new DefaultDeserializer();
+        deserializer = new DefaultSerializerDeserializer();
 
     }
     public JWSDeserializer(Deserializer deserializer) {
@@ -36,10 +36,10 @@ public class JWSDeserializer implements Deserializer {
 
     }
     public JWSDeserializer(String publicKey) {
-        deserializer = new DefaultDeserializer();
+        deserializer = new DefaultSerializerDeserializer();
         setDefaultKey(publicKey);
     }
-    public JWSDeserializer(String publicKey, Deserializer deserializer) {
+    public JWSDeserializer(String publicKey, SerializerDeserializer deserializer) {
         this.deserializer = deserializer;
         setDefaultKey(publicKey);
 

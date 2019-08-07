@@ -7,12 +7,12 @@ import eu.linksmart.services.utils.function.Utils;
 import io.swagger.client.ApiClient;
 import io.swagger.client.api.ScApi;
 import io.swagger.client.model.Service;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
-import org.omg.CORBA.portable.UnknownException;
 import org.springframework.web.client.RestClientException;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -26,12 +26,13 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class BrokerConfiguration {
     private static final String SC_API_NAME = "MQTT";
+    private static Service defBrokerRegService =null;
     // id of the configuration
     protected String id = UUID.randomUUID().toString();
     // alias (human readable) name of the broker
     protected String alias = "default", realProfile = "default";
     // the default config is set
-    private static boolean _defaultSet = false;
+   // private static boolean _defaultSet = false;
     // hostname or IP of the broker
     protected static String _hostname = "localhost";
     protected String hostname = _hostname;
@@ -43,6 +44,7 @@ public class BrokerConfiguration {
     protected int securePort = _securePort;
     // if the persistence is file base, otherwise is memory based
     protected boolean filePersistence = false;
+
     // discard own messages
     protected boolean autoBlacklisting = false;
     // default subscription quality of service I[0,2]
@@ -78,7 +80,12 @@ public class BrokerConfiguration {
     // password of the user (above) for connecting to the broker
     private String password = null;
     // supported protocols
-    private static Set<String> protocols = new HashSet<>(Arrays.asList("tcp", "mqtt", "mqtt")), secureProtocols = new HashSet<>(Arrays.asList("tls", "ssl", "mqtts"));
+    protected Boolean acceptAllCerts = false;
+    // basic broker needed
+    private final static Set<String> BASIC_BROKERS = new HashSet<>(Arrays.asList("control","incoming","outgoing","linksmart","main_broker"));
+
+    protected Boolean tls = false;
+    private static Set<String> protocols = new HashSet<>(Arrays.asList("tcp", "mqtt")), secureProtocols = new HashSet<>(Arrays.asList("tls", "ssl", "mqtts"));
 
     static private boolean loaded =false;
     @JsonIgnore
@@ -92,18 +99,16 @@ public class BrokerConfiguration {
     static private transient ScApi SCclient = null;
     static {
 
-        if(Utils.isRestAvailable(conf.getString(Const.LINKSMART_SERVICE_CATALOG_ENDPOINT))){
-            ApiClient apiClient = new ApiClient();
-            apiClient.setBasePath(conf.getString(Const.LINKSMART_SERVICE_CATALOG_ENDPOINT));
-            SCclient = new ScApi(apiClient);
-        }
+        SCclient = Utils.getServiceCatalogClient(conf.getString(Const.LINKSMART_SERVICE_CATALOG_ENDPOINT));
 
 
     }
     public static Map<String,BrokerConfiguration> loadConfigurations() throws UnknownError{
         try {
             if(!loaded) {
-                List aux = conf.getList(Const.BROKERS_ALIAS);
+                //if(aliasBrokerConf.isEmpty())
+
+                List aux = conf.getStringList(Const.BROKERS_ALIAS);
                 List<String> aliases = new ArrayList<>();
                 aliases.addAll(aux);
                 if (aliasBrokerConf.isEmpty() || !aliasBrokerConf.keySet().containsAll(aliases))
@@ -113,11 +118,17 @@ public class BrokerConfiguration {
             return aliasBrokerConf;
         }catch (Exception e){
             throw new UnknownError(e.getMessage());
+        }finally {
+
+            if(!aliasBrokerConf.keySet().containsAll(BASIC_BROKERS))
+                BASIC_BROKERS.forEach(i -> aliasBrokerConf.putIfAbsent(i, loadConfiguration(i)));
         }
 
 
     }
-
+    static public Set<String> knownBrokers(){
+            return loadConfigurations().keySet();
+    }
     static public void put(String alias,BrokerConfiguration brokerConfiguration){
         aliasBrokerConf.putIfAbsent(alias,brokerConfiguration);
     }
@@ -147,12 +158,30 @@ public class BrokerConfiguration {
                 mqttOptions.setWill(brokerConf.willTopic, brokerConf.will.getBytes(),2,false);
 
 
-          //  mqttOptions.setServerURIs();
+          mqttOptions.setServerURIs( new String[]{brokerConf.getURL()} );
           //  mqttOptions.setSSLProperties();
-            if(brokerConf.secConf!=null && !"".equals(brokerConf.secConf.CApath) && !"".equals(brokerConf.secConf.clientCertificatePath) && !"".equals(brokerConf.secConf.keyPath) ) {
+            if(brokerConf.tls && brokerConf.acceptAllCerts) {
                 SSLSocketFactory socketFactory;
                 try {
-                    socketFactory = Utils.getSocketFactory(brokerConf.secConf.CApath, brokerConf.secConf.clientCertificatePath,brokerConf.secConf.keyPath, brokerConf.secConf.CAPassword,brokerConf.secConf.clientCertificatePassword,brokerConf.secConf.keyPassword);
+                    socketFactory = Utils.getSocketFactory();
+                    mqttOptions.setSSLHostnameVerifier((s, sslSession) -> true);
+                } catch (Exception e) {
+                    throw new InternalError(e);
+                }
+                mqttOptions.setSocketFactory(socketFactory);
+            }else if(brokerConf.tls ) {
+                SSLSocketFactory socketFactory;
+                try {
+                    socketFactory = Utils.getSocketFactory();
+
+                } catch (Exception e) {
+                    throw new InternalError(e);
+                }
+                mqttOptions.setSocketFactory(socketFactory);
+            }else if(brokerConf.secConf!=null && !"".equals(brokerConf.secConf.trustStorePath)  && !"".equals(brokerConf.secConf.keyStorePath) ) {
+                SSLSocketFactory socketFactory;
+                try {
+                    socketFactory = Utils.getSocketFactory( brokerConf.secConf.trustStorePath,brokerConf.secConf.keyStorePath,brokerConf.secConf.trustStorePassword,brokerConf.secConf.keyStorePassword);
                 } catch (Exception e) {
                     throw new InternalError(e);
                 }
@@ -193,22 +222,33 @@ public class BrokerConfiguration {
             brokerConf.automaticReconnect = getBoolean(BrokerServiceConst.AUTOMATIC_RECONNECT,aux,  brokerConf.automaticReconnect);
             brokerConf.cleanSession = getBoolean(BrokerServiceConst.CLEAN_SESSION,aux,  brokerConf.cleanSession);
             brokerConf.autoBlacklisting = getBoolean(BrokerServiceConst.AUTOBLACKLISTING,aux,  brokerConf.autoBlacklisting);
-            if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)&& conf.containsKeyAnywhere(BrokerServiceConst.USER )) {
-                brokerConf.user = getString(BrokerServiceConst.USER, aux,  brokerConf.user);
-                brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux,  brokerConf.password);
+            brokerConf.acceptAllCerts =  getBoolean(Const.ACCEPT_ALL_CERTIFICATES, aux,  brokerConf.acceptAllCerts);
+            brokerConf.tls =  getBoolean(BrokerServiceConst.TLS_SOCKET, aux,  brokerConf.tls);
+            // no default pass/user (LS-290)
+            if(conf.containsKeyAnywhere(BrokerServiceConst.USER + aux)) { // checks if there is user specifically for this broker
+                brokerConf.user = conf.getString(BrokerServiceConst.USER,  null);
+                brokerConf.password = conf.getString(BrokerServiceConst.PASSWORD,  null);
+            } else if(conf.containsKeyAnywhere(BrokerServiceConst.USER_DEFAULT_CREDENTIALS + aux)) { // checks if this specific broker has the 'use global default user/pass' policy in case there is no user for this broker
+                if(conf.getBoolean(BrokerServiceConst.USER_DEFAULT_CREDENTIALS + aux)) { // if the specific broker policy is set to true, use global user/pass
+                    brokerConf.user = getString(BrokerServiceConst.USER, aux, null);
+                    brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux, null);
+                }
+            }else if(conf.containsKeyAnywhere(BrokerServiceConst.USER_DEFAULT_CREDENTIALS) ) { // if there is no specific broker policy, checks if there is a global 'use global default user/pass' policy in case there is no user for this broker
+                if(conf.getBoolean(BrokerServiceConst.USER_DEFAULT_CREDENTIALS)) { // if the general policy is set to true, use global user/pass
+                    brokerConf.user = getString(BrokerServiceConst.USER, aux, null);
+                    brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux, null);
+                }
             }
 
             if ((conf.containsKeyAnywhere(Const.CERTIFICATE_BASE_SECURITY) ||  conf.containsKeyAnywhere(Const.CERTIFICATE_BASE_SECURITY + aux))&& getBoolean(Const.CERTIFICATE_BASE_SECURITY, aux,  brokerConf.secConf != null)) {
                 brokerConf.secConf = brokerConf.getInitSecurityConfiguration();
-                brokerConf.secConf.CApath = getString(Const.CA_CERTIFICATE_PATH, aux,  brokerConf.secConf.CApath);
-                brokerConf.secConf.clientCertificatePath = getString(Const.CERTIFICATE_FILE_PATH, aux,  brokerConf.secConf.clientCertificatePath);
-                brokerConf.secConf.keyPath = getString(Const.KEY_FILE_PATH, aux,  brokerConf.secConf.keyPath);
-                brokerConf.secConf.CAPassword = getString(Const.CA_CERTIFICATE_PASSWORD, aux,  brokerConf.secConf.CAPassword);
-                brokerConf.secConf.clientCertificatePassword = getString(Const.CERTIFICATE_PASSWORD, aux,  brokerConf.secConf.clientCertificatePassword);
-                brokerConf.secConf.keyPassword = getString(Const.KEY_PASSWORD, aux,  brokerConf.secConf.keyPassword);
+                brokerConf.secConf.trustStorePath = getString(Const.TRUST_STORE_FILE_PATH, aux,  brokerConf.secConf.trustStorePath);
+                brokerConf.secConf.keyStorePath = getString(Const.KEY_STORE_FILE_PATH, aux,  brokerConf.secConf.keyStorePath);
+                brokerConf.secConf.trustStorePassword = getString(Const.CERTIFICATE_PASSWORD, aux,  brokerConf.secConf.trustStorePassword);
+                brokerConf.secConf.keyStorePassword = getString(Const.KEY_PASSWORD, aux,  brokerConf.secConf.keyStorePassword);
             }
 
-            linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
+            linksmartServiceCatalogOverwrite(brokerConf, alias);
 
             return brokerConf;
         }catch (Exception e){
@@ -217,8 +257,11 @@ public class BrokerConfiguration {
     }
     static protected BrokerConfiguration loadConfiguration(BrokerConfiguration brokerConf,  BrokerConfiguration reference){
         if(reference == null)
-            throw  new UnknownException(new Exception("The provided broker configuration reference is not exists or it's null"));
+            throw  new UnknownError(("The provided broker configuration reference is not exists or it's null"));
         try {
+
+            String aux = "".equals(reference.alias)|| reference.alias==null ? "":"_" + reference.alias;
+
             brokerConf.hostname = reference.hostname;
             brokerConf.port = reference.port;
             brokerConf.securePort = reference.securePort;
@@ -235,21 +278,22 @@ public class BrokerConfiguration {
             brokerConf.version = reference.version;
             brokerConf.automaticReconnect = reference.automaticReconnect;
             brokerConf.cleanSession = reference.cleanSession;
-            brokerConf.user = reference.user;
-            brokerConf.password = reference.password;
+            // no default pass/user (LS-290)
+            brokerConf.user = getString(BrokerServiceConst.USER,aux,null);
+            brokerConf.password = getString(BrokerServiceConst.PASSWORD, aux,null);
             brokerConf.autoBlacklisting = reference.autoBlacklisting;
+            brokerConf.acceptAllCerts = reference.acceptAllCerts;
+            brokerConf.tls = reference.tls;
 
             if (reference.secConf!=null) {
                 brokerConf.secConf = brokerConf.getInitSecurityConfiguration();
-                brokerConf.secConf.CApath = reference.secConf.CApath;
-                brokerConf.secConf.clientCertificatePath = reference.secConf.clientCertificatePath;
-                brokerConf.secConf.keyPath = reference.secConf.keyPath;
-                brokerConf.secConf.CAPassword = reference.secConf.CAPassword;
-                brokerConf.secConf.clientCertificatePassword = reference.secConf.clientCertificatePassword;
-                brokerConf.secConf.keyPassword = reference.secConf.keyPassword;
+                brokerConf.secConf.trustStorePath = reference.secConf.trustStorePath;
+                brokerConf.secConf.keyStorePath = reference.secConf.keyStorePath;
+                brokerConf.secConf.trustStorePassword = reference.secConf.trustStorePassword;
+                brokerConf.secConf.keyStorePassword = reference.secConf.keyStorePassword;
             }else
                 brokerConf.secConf = null;
-            linksmartServiceCatalogOverwrite(brokerConf, brokerConf.alias);
+            linksmartServiceCatalogOverwrite(brokerConf, reference.alias);
 
             if(reference.equals(brokerConf))
                 brokerConf.realProfile = reference.realProfile;
@@ -264,27 +308,23 @@ public class BrokerConfiguration {
 
             if (SCclient != null ){
 
-                Service service =null;
+                defBrokerRegService =null;
                 try{
-                    service =SCclient.idGet(alias);
-                }catch (RestClientException e){
-                    if(_defaultSet)
-                        return brokerConfiguration;
-                    service = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
-                    _defaultSet = true;
-
+                    if ("".equals(alias))
+                        defBrokerRegService = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
+                    else
+                        defBrokerRegService =SCclient.idGet(alias);
+                }catch (Exception e) {
+                    if (defBrokerRegService == null)
+                        defBrokerRegService = SCclient.idGet(conf.getString(Const.LINKSMART_BROKER));
                 }
-
-                URI url = new URI(service.getApis().get(SC_API_NAME));
-
-                brokerConfiguration.hostname = url.getHost();
-                if(protocols.contains(url.getScheme())) {
-                    brokerConfiguration.port = url.getPort();
-                    brokerConfiguration.hostname = url.getHost();
+                Pair<String, Integer> hostnamePort = Utils.getHostnamePort(defBrokerRegService.getApis().get(SC_API_NAME));
+                brokerConfiguration.hostname = hostnamePort.getKey();
+                if(protocols.contains(Utils.getProtocol(defBrokerRegService.getApis().get(SC_API_NAME)))) {
+                    brokerConfiguration.port = hostnamePort.getValue();
                 }
-                if(secureProtocols.contains(url.getScheme())){
-                    brokerConfiguration.port = url.getPort();
-                    brokerConfiguration.hostname = url.getHost();
+                if(secureProtocols.contains(Utils.getProtocol(defBrokerRegService.getApis().get(SC_API_NAME)))){
+                    brokerConfiguration.securePort = hostnamePort.getValue();
 
                 }
 
@@ -415,8 +455,8 @@ public class BrokerConfiguration {
     }
 
     public String getURL(){
-        if(secConf!=null)
-            return Broker.getSecureBrokerURL(hostname,port);
+        if(secConf!=null || this.tls)
+            return Broker.getSecureBrokerURL(hostname,securePort);
 
         return Broker.getBrokerURL(hostname, port);
     }
@@ -495,7 +535,7 @@ public class BrokerConfiguration {
             return true;
         if (o!=null && o instanceof BrokerConfiguration) {
             BrokerConfiguration aux = (BrokerConfiguration) o;
-            boolean equal = aux.hostname.equals(hostname) && aux.securePort == securePort && aux.port == port && aux.filePersistence == filePersistence
+            boolean equal = aux.hostname!=null && aux.hostname.equals(hostname)  && aux.securePort == securePort && aux.port == port && aux.filePersistence == filePersistence
                     && aux.subQoS == subQoS && aux.pubQoS == pubQoS && aux.retainPolicy == retainPolicy && aux.keepAlive == keepAlive && aux.timeOut == timeOut && aux.noTries == noTries
                     && aux.reconnectWaitingTime == reconnectWaitingTime;
             if (equal && secConf != null)
@@ -525,6 +565,7 @@ public class BrokerConfiguration {
                 "\"version\":\""+version.toString()+"\"," +
                 "\"inFlightMessages\":\""+maxInFlightMessages+"\"," +
                 "\"reconnectWaitingTime\":\""+reconnectWaitingTime +"\""+
+                "\", acceptAllCert\":"+String.valueOf(acceptAllCerts)+"" +
                 ( ( secConf != null ) ? (",\"brokerSecurityConfiguration\":"+secConf.toString() ): ("") )
                 +"}";
 
@@ -593,71 +634,37 @@ public class BrokerConfiguration {
     public static BrokerConfiguration remove(String alias) {
         return aliasBrokerConf.remove(alias);
     }
+    public Boolean getAcceptAllCerts() {
+        return acceptAllCerts;
+    }
+
+    public void setAcceptAllCerts(Boolean acceptAllCerts) {
+        this.acceptAllCerts = acceptAllCerts;
+    }
+
+    public boolean isAutoBlacklisting() {
+        return autoBlacklisting;
+    }
+
+    public void setAutoBlacklisting(boolean autoBlacklisting) {
+        this.autoBlacklisting = autoBlacklisting;
+    }
 
     public class BrokerSecurityConfiguration{
-        protected String CApath = "";
 
-        protected String CAPassword = "";
+        protected String trustStorePath = "";
 
-        protected String clientCertificatePath = "";
+        protected String trustStorePassword = "";
 
-        protected String clientCertificatePassword = "";
+        protected String keyStorePath = "";
 
-        protected String keyPath = "";
+        protected String keyStorePassword = "";
 
-        protected String keyPassword = "";
 
         protected BrokerSecurityConfiguration(){
             // nothing
         }
 
-        public String getCApath() {
-            return CApath;
-        }
-
-        public String getCAPassword() {
-            return CAPassword;
-        }
-
-        public String getClientCertificatePath() {
-            return clientCertificatePath;
-        }
-
-        public String getClientCertificatePassword() {
-            return clientCertificatePassword;
-        }
-
-        public String getKeyPath() {
-            return keyPath;
-        }
-
-        public String getKeyPassword() {
-            return keyPassword;
-        }
-
-        public void setCApath(String CApath) {
-            this.CApath = CApath;
-        }
-
-        public void setCAPassword(String CAPassword) {
-            this.CAPassword = CAPassword;
-        }
-
-        public void setClientCertificatePath(String clientCertificatePath) {
-            this.clientCertificatePath = clientCertificatePath;
-        }
-
-        public void setClientCertificatePassword(String clientCertificatePassword) {
-            this.clientCertificatePassword = clientCertificatePassword;
-        }
-
-        public void setKeyPath(String keyPath) {
-            this.keyPath = keyPath;
-        }
-
-        public void setKeyPassword(String keyPassword) {
-            this.keyPassword = keyPassword;
-        }
         @Override
         public boolean equals(Object o){
 
@@ -665,7 +672,7 @@ public class BrokerConfiguration {
                 return true;
             if(o!=null && o instanceof BrokerSecurityConfiguration ) {
                 BrokerSecurityConfiguration aux = (BrokerSecurityConfiguration)o;
-                return aux.CApath.equals(CApath)  && aux.CAPassword.equals(CAPassword) && aux.clientCertificatePath.equals(clientCertificatePath) && aux.clientCertificatePassword.equals(clientCertificatePassword) && aux.keyPath.equals(keyPath) && aux.keyPassword.equals(keyPassword);
+                return  aux.trustStorePath.equals(trustStorePath) && aux.trustStorePassword.equals(trustStorePassword) && aux.keyStorePath.equals(keyStorePath) && aux.keyStorePassword.equals(keyStorePassword);
             }
             return false;
 
@@ -675,12 +682,10 @@ public class BrokerConfiguration {
         public String toString(){
 
             return "{" +
-                    "\"CApath\":\""+CApath+"\"," +
-                    "\"CAPassword\":\""+CAPassword+"\"," +
-                    "\"clientCertificatePath\":\""+clientCertificatePath+"\"," +
-                    "\"clientCertificatePassword\":\""+clientCertificatePassword+"\"," +
-                    "\"keyPath\":\""+keyPath+"\"," +
-                    "\"keyPassword\":\""+keyPassword+"\"" +
+                    "\"clientCertificatePath\":\""+trustStorePath+"\"," +
+                    "\"clientCertificatePassword\":\""+trustStorePassword+"\"," +
+                    "\"keyPath\":\""+keyStorePath+"\"," +
+                    "\"keyPassword\":\""+keyStorePassword+"\"" +
                     "}";
 
         }
@@ -689,6 +694,39 @@ public class BrokerConfiguration {
 
             return toString().hashCode();
         }
+
+        public String getTrustStorePath() {
+            return trustStorePath;
+        }
+
+        public void setTrustStorePath(String trustStorePath) {
+            this.trustStorePath = trustStorePath;
+        }
+
+        public String getTrustStorePassword() {
+            return trustStorePassword;
+        }
+
+        public void setTrustStorePassword(String trustStorePassword) {
+            this.trustStorePassword = trustStorePassword;
+        }
+
+        public String getKeyStorePath() {
+            return keyStorePath;
+        }
+
+        public void setKeyStorePath(String keyStorePath) {
+            this.keyStorePath = keyStorePath;
+        }
+
+        public String getKeyStorePassword() {
+            return keyStorePassword;
+        }
+
+        public void setKeyStorePassword(String keyStorePassword) {
+            this.keyStorePassword = keyStorePassword;
+        }
+
 
     }
     public enum  MqttVersion{

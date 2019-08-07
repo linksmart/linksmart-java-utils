@@ -206,7 +206,12 @@ public class Configurator extends CombinedConfiguration {
 
     @Override
     public boolean getBoolean(String key) {
-        return get(key, Boolean.class);
+        Boolean re= get(key, Boolean.class);
+        if(re==null) {
+            System.err.println("Key "+key+" has value null o no value. The system then set the value false (null not possible value in boolean)");
+            re = false;
+        }
+        return re;
     }
 
     @Override
@@ -267,6 +272,9 @@ public class Configurator extends CombinedConfiguration {
             return result[0].split(",");
         else
             return result;
+    }
+    public List<String> getStringList(String key) {
+        return Arrays.asList( getStringArray(key));
     }
     private <T>  T get(String key, Class<T> type){
         int i = mostRecentConf(key);

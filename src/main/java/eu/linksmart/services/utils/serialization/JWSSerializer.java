@@ -35,16 +35,8 @@ public class JWSSerializer implements Serializer {
     private PublicKey publicKey;
 
 
-    public JWSSerializer(Serializer serializer, String key) throws IOException {
-        this.serializer = serializer;
-        this.algorithmName = def_key_algorithm;
-        this.curve =def_curve;
-        this.keysize = def_keysize;
-        this.algorithm = JWSAlgorithm.parse(def_sing_algorithm.name());
-        this.signer = createSigner(key);
-        this.header = new JWSHeader.Builder(algorithm).keyID(UUID.randomUUID().toString()).build();
-    }
-    public JWSSerializer(Serializer serializer) throws IOException {
+
+    public JWSSerializer(SerializerDeserializer serializer) throws IOException {
         this.serializer = serializer;
         this.algorithmName = def_key_algorithm;
         this.algorithm = JWSAlgorithm.parse(def_sing_algorithm.name());
@@ -52,46 +44,6 @@ public class JWSSerializer implements Serializer {
         this.keysize = def_keysize;
         this.signer = createSigner();
         this.header = new JWSHeader.Builder(algorithm).keyID(UUID.randomUUID().toString()).build();
-    }
-    public JWSSerializer(Serializer serializer, String key, KeyAlgorithms keyAlgorithm) throws IOException {
-        this.serializer = serializer;
-        this.algorithmName = keyAlgorithm;
-        this.algorithm = JWSAlgorithm.parse(def_sing_algorithm.name());
-        this.curve = def_curve;
-        this.keysize = def_keysize;
-        this.signer = createSigner(key);
-        this.header = new JWSHeader.Builder(this.algorithm).keyID(UUID.randomUUID().toString()).build();
-    }
-
-    public JWSSerializer(Serializer serializer, String key, SingingAlgorithms singingAlgorithms) throws IOException {
-        this.serializer = serializer;
-        this.algorithm = JWSAlgorithm.parse(singingAlgorithms.name());
-        this.algorithmName = fromKeyToSigningAlgorithm(singingAlgorithms);
-        this.curve = def_curve;
-        this.keysize = def_keysize;
-        this.signer = createSigner(key);
-        this.header = new JWSHeader.Builder(this.algorithm).keyID(UUID.randomUUID().toString()).build();
-    }
-    public JWSSerializer(Serializer serializer, String key, String curve) throws IOException {
-        this.serializer = serializer;
-        this.algorithmName = KeyAlgorithms.EC;
-        this.curve = Curve.parse(curve);
-        this.algorithm = JWSAlgorithm.parse(SingingAlgorithms.ES256.name());
-        this.keysize = def_keysize;
-        this.signer = createSigner(key);
-        this.header = new JWSHeader.Builder(this.algorithm).keyID(UUID.randomUUID().toString()).build();
-
-    }
-
-    public JWSSerializer(Serializer serializer, String key, int keysize) throws IOException {
-        this.serializer = serializer;
-        this.algorithmName = KeyAlgorithms.RSA;
-        this.algorithm = JWSAlgorithm.parse(def_sing_algorithm.name());
-        this.curve = def_curve;
-        this.keysize = keysize;
-        this.signer = createSigner(key);
-        this.header = new JWSHeader.Builder(this.algorithm).keyID(UUID.randomUUID().toString()).build();
-
     }
     private KeyAlgorithms fromKeyToSigningAlgorithm(SingingAlgorithms sa){
         if(sa.name().contains("RS") || sa.name().contains("PS"))
