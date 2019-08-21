@@ -6,12 +6,12 @@ cache:
 before_install: if [ "$TRAVIS_BRANCH" = "master" ]; then export ARTIFACT_VERSION=`python  .versionScript.py --versionType release`; fi
 deploy:
   - provider: script
-    script: "mvn deploy"
+    script: mvn deploy
     skip_cleanup: true
     on:
       branch: master
   - provider: script
-    script: "mvn deploy"
+    script: mvn deploy
     skip_cleanup: true
     on:
      branch: dev
