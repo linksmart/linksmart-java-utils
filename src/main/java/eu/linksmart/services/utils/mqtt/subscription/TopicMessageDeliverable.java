@@ -70,7 +70,7 @@ public class TopicMessageDeliverable implements Runnable{
         }
         while (active) {
 
-            loggerService.debug(" Started the topic loop");
+            // loggerService.debug(" Started the topic loop");
             try {
                 message = mqttMessages.take();
                 // loggerService.debug("Processing incoming message of topic "+ message.getTopic());
