@@ -1,0 +1,13 @@
+language: java
+jdk: openjdk10
+before_install: if [ "$TRAVIS_BRANCH" = "master" ]; then export ARTIFACT_VERSION=`python  .versionScript.py --versionType release`; fi
+deploy:
+  provider: script
+  script: "cp .travis.settings.xml $HOME/.m2/settings.xml && mvn deploy"
+  skip_cleanup: true
+after_deploy:
+  - "if [ '$TRAVIS_BRANCH' = 'master' ]; then python .versionScript.py --versionType minor; fi"
+  - "if [ '$TRAVIS_BRANCH' = 'master' ] git commit -am '[skip travis] AUTOMATIC COMMIT: tagging version'"
+  - "if [ '$TRAVIS_BRANCH' = 'master' ] git config --global user.email 'travis@travis-ci.org'"
+  - "if [ '$TRAVIS_BRANCH' = 'master' ] git config --global user.name 'Travis CI'"
+  - "if [ '$TRAVIS_BRANCH' = 'master' ] git push https://${GH_TOKEN}@github.com/linksmart/data-processing-agent.git --all --tags"
