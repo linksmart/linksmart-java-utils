@@ -132,7 +132,7 @@ public  class ForwardingListener implements MqttCallback {
 
     @Override
     public void messageArrived(String topic, org.eclipse.paho.client.mqttv3.MqttMessage mqttMessage) {
-        LOG.debug("Message arrived in listener:" + topic);
+        // LOG.debug("Message arrived in listener:" + topic);
         if(autoblacklisting && publishedTopics.contains(topic)) {// if this topic had been used to published
             // publishedTopics.remove(topic);
             return;

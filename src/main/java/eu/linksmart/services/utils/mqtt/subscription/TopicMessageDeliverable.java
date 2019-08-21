@@ -31,7 +31,7 @@ public class TopicMessageDeliverable implements Runnable{
 
     protected transient Logger loggerService = LogManager.getLogger(TopicMessageDeliverable.class);
     public TopicMessageDeliverable(String topic) {
-        loggerService.debug("Starting new ");
+        // loggerService.debug("Starting new ");
         Thread thread =new Thread(this);
         thread.start();
 
@@ -73,7 +73,7 @@ public class TopicMessageDeliverable implements Runnable{
             loggerService.debug(" Started the topic loop");
             try {
                 message = mqttMessages.take();
-                loggerService.debug("Processing incoming message of topic "+ message.getTopic());
+                // loggerService.debug("Processing incoming message of topic "+ message.getTopic());
                 synchronized (this) {
                     for (Observer observer : observers)
                         observer.update(null, message);
