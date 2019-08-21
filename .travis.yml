@@ -5,14 +5,16 @@ cache:
     - "$HOME/.m2"
 before_install: if [ "$TRAVIS_BRANCH" = "master" ]; then export ARTIFACT_VERSION=`python  .versionScript.py --versionType release`; fi
 deploy:
-  provider: script
-  script: "cp .travis.settings.xml $HOME/.m2/settings.xml && mvn deploy"
-  skip_cleanup: true
-  on:
-    branches:
-      only:
-        - master
-        - dev
+  - provider: script
+    script: "mvn deploy"
+    skip_cleanup: true
+    on:
+      branch: master
+  - provider: script
+    script: "mvn deploy"
+    skip_cleanup: true
+    on:
+     branch: dev
 after_deploy:
   - "if [ '$TRAVIS_BRANCH' = 'master' ]; then python .versionScript.py --versionType minor; fi"
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git commit -am '[skip travis] AUTOMATIC COMMIT: tagging version'"
