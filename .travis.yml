@@ -9,12 +9,12 @@ deploy:
     script: mvn deploy
     skip_cleanup: true
     on:
-      branch: master
+      branch: dev
   - provider: script
     script: mvn deploy
     skip_cleanup: true
     on:
-     branch: dev
+      branch: master
 after_deploy:
   - "if [ '$TRAVIS_BRANCH' = 'master' ]; then python .versionScript.py --versionType minor; fi"
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git commit -am '[skip travis] AUTOMATIC COMMIT: tagging version'"
