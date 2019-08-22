@@ -1,13 +1,14 @@
 import glob, argparse, os
 
+# 0 Mayor, 1 minor, 2 patch, 3 release, 4 default
+nextVersion = 4
 fileName="pom.xml"
 mainVer = 1
 minorVer = 3
 patchVer = 0
-tag="-SNAPSHOT"
+tag = "-SNAPSHOT"
 ver=str(mainVer)+"."+str(minorVer)+"."+str(patchVer)+tag
-# 0 Mayor, 1 minor, 2 patch, 3 release
-nextVersion=1
+
 
 def findPoms():
     path = './'
@@ -17,16 +18,28 @@ def findPoms():
 
 def toNextVersion():
     global ver
-    if nextVersion==0: # mayor change
+    global nextVersion
+    global tag
+
+    if nextVersion==0: # mayor snapshot
         ver = str(mainVer+1)+"."+str(minorVer)+"."+str(patchVer)+tag
+    elif nextVersion==1: # minor
+        ver = str(mainVer)+"."+str(minorVer+1)+"."+str(patchVer)+tag
     elif nextVersion==2: # patch
         ver = str(mainVer)+"."+str(minorVer)+"."+str(patchVer+1)+tag
     elif nextVersion==3: # release (remove snapshot)
         ver = str(mainVer)+"."+str(minorVer)+"."+str(patchVer)
     else: # minor change (default)
-        ver = str(mainVer)+"."+str(minorVer+1)+"."+str(patchVer)+tag
+        if "-SNAPSHOT" in ver:# release (remove snapshot)
+            ver = str(mainVer)+"."+str(minorVer)+"."+str(patchVer)
+        else: # minor
+            ver = str(mainVer)+"."+str(minorVer+1)+"."+str(patchVer)+tag
 
 def currentVersion(line):
+    global mainVer
+    global minorVer
+    global patchVer
+    global ver
     verPtr=line.find("<!--VerNo-->")
     aux=line.replace("<!--VerNo-->","")
     ver=aux[verPtr:aux.find("</version>")]
@@ -35,7 +48,8 @@ def currentVersion(line):
     if tag in ver.split('.')[2]:
         patchVer=int(ver.split('.')[2].split("-")[0])
     else:
-        patchVer=int(ver.split()[2])
+        #print(ver)
+        patchVer=int(ver.split(".")[2])
 
 def nextPom(pom):
     #print("generating update for pom: "+pom)
@@ -68,15 +82,15 @@ def updatePom(pom, lines):
 
 branch = os.popen("git branch").read()[1]
 if branch == 'master':
-    global nextVersion
-    nextVersion = 3 # set to release
+    nextVersion = 4 # set to default
 
 parser = argparse.ArgumentParser(description='Updates the pom version by increasing the snapshot version or removing the snapshot tag of all poms below the cwd (recursively).')
 
-parser.add_argument('--versionType',type=str, action='store_const', const='<minor>', help="the pom target version, if currently the pom is a release: then it can be <major>, <minor>, or <patch> snapshot; otherwise <release>")
+parser.add_argument('--versionType', type=str, default='<minor>', help="the pom target version, if currently the pom is a release: then it can be <major>, <minor>, or <patch> snapshot; otherwise <release>")
 # if current version is a release and <minor> is selected then only removes the snapshot.
 args = parser.parse_args()
-print(args.accumulate(args.integers))
+
+
 
 
 poms = findPoms()
