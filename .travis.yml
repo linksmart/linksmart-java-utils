@@ -3,7 +3,7 @@ jdk: openjdk10
 cache:
   directories:
     - "$HOME/.m2"
-before_install: if [ "$TRAVIS_BRANCH" = "master" ]; then export ARTIFACT_VERSION=`python  .versionScript.py --versionType release`; fi
+before_install: if [ "$TRAVIS_BRANCH" = "master" ]; then export ARTIFACT_VERSION=`python .versionScript.py`; fi
 deploy:
   - provider: script
     script: mvn deploy
@@ -16,7 +16,7 @@ deploy:
     on:
       branch: master
 after_deploy:
-  - "if [ '$TRAVIS_BRANCH' = 'master' ]; then python .versionScript.py --versionType minor; fi"
+  - "if [ '$TRAVIS_BRANCH' = 'master' ]; then python .versionScript.py; fi"
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git commit -am '[skip travis] AUTOMATIC COMMIT: tagging version'"
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git config --global user.email 'travis@travis-ci.org'"
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git config --global user.name 'Travis CI'"
