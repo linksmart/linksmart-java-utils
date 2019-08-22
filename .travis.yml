@@ -23,4 +23,5 @@ after_deploy:
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git branch tmp"
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git checkout dev"
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git merge tmp"
+  - "if [ '$TRAVIS_BRANCH' = 'master' ] git branch -d tmp"
   - "if [ '$TRAVIS_BRANCH' = 'master' ] git push https://${GH_TOKEN}@github.com/linksmart/data-processing-agent.git --all --tags"
