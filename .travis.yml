@@ -5,8 +5,8 @@ cache:
     - "$HOME/.m2"
 before_install:
   - curl -O https://raw.githubusercontent.com/linksmart/ci-scripts/master/java/ci-preparation.sh
-  - ls -la
-  - sudo ./ci-preparation.sh
+  - chmod +x ci-preparation.sh
+  - ./ci-preparation.sh
 deploy:
   - provider: script
     script: curl -s https://raw.githubusercontent.com/linksmart/ci-scripts/master/java/maven-release.sh | bash
