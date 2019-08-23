@@ -25,7 +25,7 @@ after_deploy:
   - git checkout release
   - git merge tmp
   - git branch -d tmp
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git tag $ARTIFACT_VERSION; fi"
+  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git tag v$ARTIFACT_VERSION; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git commit -am \"[skip travis] AUTOMATIC COMMIT: tagging version\"; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git fetch origin master:master; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git branch -a; fi"
