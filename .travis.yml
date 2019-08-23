@@ -36,5 +36,6 @@ after_deploy:
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git checkout master; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git merge release; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then python3 .versionScript.py; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git push https://${GH_TOKEN}@github.com/linksmart/linksmart-java-utils.git --all --tags; fi"
+  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git push https://${GH_TOKEN}@github.com/linksmart/linksmart-java-utils.git --all; fi"
+  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git push https://${GH_TOKEN}@github.com/linksmart/linksmart-java-utils.git --tags; fi"
   - git status
