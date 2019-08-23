@@ -3,13 +3,10 @@ jdk: openjdk10
 cache:
   directories:
     - "$HOME/.m2"
-before_install:
-  - if [ "$TRAVIS_BRANCH" = "release" ]; then export ARTIFACT_VERSION=`python3 .versionScript.py`; fi
-  - echo $TRAVIS_BRANCH
-  - echo $ARTIFACT_VERSION
+before_install: curl -s https://raw.githubusercontent.com/linksmart/ci-scripts/master/java/ci-preparation.sh | bash
 deploy:
   - provider: script
-    script: mvn deploy
+    script: curl -s https://raw.githubusercontent.com/linksmart/ci-scripts/master/java/maven-release.sh | bash
     skip_cleanup: true
     on:
       branch: release
@@ -18,21 +15,3 @@ deploy:
     skip_cleanup: true
     on:
       branch: master
-after_deploy:
-  - git config --global user.email 'travis@travis-ci.org'
-  - git config --global user.name 'Travis CI'
-  - git branch tmp
-  - git checkout release
-  - git merge tmp
-  - git branch -d tmp
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git tag v$ARTIFACT_VERSION; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git commit -am \"[skip travis] AUTOMATIC COMMIT: tagging version\"; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git fetch origin master:master; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git branch -a; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git checkout master; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git merge release; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then python3 .versionScript.py; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git commit -am \"[skip travis] AUTOMATIC COMMIT: preparing new SNAPSHOT\"; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git push https://${GH_TOKEN}@github.com/linksmart/linksmart-java-utils.git --all; fi"
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git push https://${GH_TOKEN}@github.com/linksmart/linksmart-java-utils.git --tags; fi"
-  - git status
