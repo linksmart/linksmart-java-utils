@@ -7,7 +7,6 @@ before_install:
   - if [ "$TRAVIS_BRANCH" = "release" ]; then export ARTIFACT_VERSION=`python3 .versionScript.py`; fi
   - echo $TRAVIS_BRANCH
   - echo $ARTIFACT_VERSION
-  - python3 --version
 deploy:
   - provider: script
     script: mvn deploy
@@ -22,18 +21,15 @@ deploy:
 after_deploy:
   - git config --global user.email 'travis@travis-ci.org'
   - git config --global user.name 'Travis CI'
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then export TEST=1; fi"
-  - echo $TEST
-  - if [ "$TRAVIS_BRANCH" = "release" ]; then export TEST=2; fi
-  - echo $TEST
   - git branch tmp
   - git checkout release
   - git merge tmp
   - git branch -d tmp
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git tag v$ARTIFACT_VERSION; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git commit -am \"[skip travis] AUTOMATIC COMMIT: tagging version\"; fi"
-  - git brnach
-  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git checkout -b master --track origin/master; fi"
+  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git fetch origin master:master; fi"
+  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git branch -a; fi"
+  - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git checkout master; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git merge release; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then python3 .versionScript.py; fi"
   - "if [ \"$TRAVIS_BRANCH\" = \"release\" ]; then git commit -am \"[skip travis] AUTOMATIC COMMIT: preparing new SNAPSHOT\"; fi"
