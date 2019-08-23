@@ -3,25 +3,27 @@ jdk: openjdk10
 cache:
   directories:
     - "$HOME/.m2"
-before_install: if [ "$TRAVIS_BRANCH" = "master" ]; then export ARTIFACT_VERSION=`python .versionScript.py`; fi
+before_install: if [ "$TRAVIS_BRANCH" = "release" ]; then export ARTIFACT_VERSION=`python .versionScript.py`; fi
 deploy:
   - provider: script
     script: mvn deploy
     skip_cleanup: true
     on:
-      branch: dev
+      branch: release
   - provider: script
     script: mvn deploy
     skip_cleanup: true
     on:
       branch: master
 after_deploy:
-  - "if [ '$TRAVIS_BRANCH' = 'master' ]; then python .versionScript.py; fi"
-  - "if [ '$TRAVIS_BRANCH' = 'master' ] git commit -am '[skip travis] AUTOMATIC COMMIT: tagging version'"
-  - "if [ '$TRAVIS_BRANCH' = 'master' ] git config --global user.email 'travis@travis-ci.org'"
-  - "if [ '$TRAVIS_BRANCH' = 'master' ] git config --global user.name 'Travis CI'"
-  - "if [ '$TRAVIS_BRANCH' = 'master' ] git branch tmp"
-  - "if [ '$TRAVIS_BRANCH' = 'master' ] git checkout dev"
-  - "if [ '$TRAVIS_BRANCH' = 'master' ] git merge tmp"
-  - "if [ '$TRAVIS_BRANCH' = 'master' ] git branch -d tmp"
-  - "if [ '$TRAVIS_BRANCH' = 'master' ] git push https://${GH_TOKEN}@github.com/linksmart/linksmart-java-utils.git --all --tags"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git commit -am '[skip travis] AUTOMATIC COMMIT: tagging version'"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git config --global user.email 'travis@travis-ci.org'"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git config --global user.name 'Travis CI'"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git branch tmp"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git checkout release"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git merge tmp"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git branch -d tmp"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git checkout master"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git merge release"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ]; then python .versionScript.py; fi"
+  - "if [ '$TRAVIS_BRANCH' = 'release' ] git push https://${GH_TOKEN}@github.com/linksmart/linksmart-java-utils.git --all --tags"

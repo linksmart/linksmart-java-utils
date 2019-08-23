@@ -81,7 +81,7 @@ def updatePom(pom, lines):
             f.write("%s" % line)
 
 branch = os.popen("git branch").read()[1]
-if branch == 'master':
+if branch == 'release':
     nextVersion = 4 # set to default
 
 parser = argparse.ArgumentParser(description='Updates the pom version by increasing the snapshot version or removing the snapshot tag of all poms below the cwd (recursively).')
