@@ -3,7 +3,11 @@ jdk: openjdk10
 cache:
   directories:
     - "$HOME/.m2"
-before_install: if [ "$TRAVIS_BRANCH" = "release" ]; then export ARTIFACT_VERSION=`python3 .versionScript.py`; fi
+before_install:
+  - if [ "$TRAVIS_BRANCH" = "release" ]; then export ARTIFACT_VERSION=`python3 .versionScript.py`; fi
+  - echo $TRAVIS_BRANCH
+  - echo $ARTIFACT_VERSION
+  - python3 --version
 deploy:
   - provider: script
     script: mvn deploy
