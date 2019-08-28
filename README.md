@@ -1,11 +1,8 @@
-[![GitHub tag (latest release)](https://img.shields.io/github/tag/linksmart/linksmart-java-utils.svg?label=release)](https://github.com/linksmart/linksmart-java-utils/tags) 
-
-**SNAPSHOT**  [![Build Status](https://travis-ci.com/linksmart/linksmart-java-utils.svg?branch=master)](https://travis-ci.com/linksmart/linksmart-java-utils) 
-**RELEASE**  [![Build Status](https://travis-ci.com/linksmart/linksmart-java-utils.svg?branch=release)](https://travis-ci.com/linksmart/linksmart-java-utils)
-
-
 LinkSmart Java Utility 
 ======================
+[![GitHub tag (latest release)](https://img.shields.io/github/tag/linksmart/linksmart-java-utils.svg?label=release)](https://github.com/linksmart/linksmart-java-utils/tags)
+[![Build Status](https://img.shields.io/travis/com/linksmart/linksmart-java-utils/master?label=master)](https://travis-ci.com/linksmart/linksmart-java-utils)
+[![Build Status](https://img.shields.io/travis/com/linksmart/linksmart-java-utils/release?label=release)](https://travis-ci.com/linksmart/linksmart-java-utils)
 
 # MQTT connection library 
 
