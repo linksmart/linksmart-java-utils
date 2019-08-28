@@ -7,7 +7,6 @@ before_install:
   - curl -O https://raw.githubusercontent.com/linksmart/ci-scripts/master/java/ci-preparation.sh
   - chmod +x ci-preparation.sh
   - . ./ci-preparation.sh
-  - echo $TRAVIS_REPO_SLUG
 deploy:
   - provider: script
     script: ./maven-release.sh
