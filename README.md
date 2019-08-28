@@ -1,3 +1,7 @@
+[![GitHub tag (latest release)](https://img.shields.io/github/tag/linksmart/linksmart-java-utils.svg?label=release)](https://github.com/linksmart/linksmart-java-utils/tags)
+[![Build Status](https://travis-ci.com/linksmart/linksmart-java-utils.svg?branch=master)](https://travis-ci.com/linksmart/linksmart-java-utils)
+
+
 LinkSmart Java Utility 
 ======================
 
@@ -7,7 +11,7 @@ The MQTT library manage the connections and configurations to MQTT broker(s). Th
 
 ## Usage 
 
-```
+```java
   package foo.bar;
 
   import eu.linksmart.services.utils.mqtt.broker.StaticBroker;
@@ -49,14 +53,14 @@ The MQTT library manage the connections and configurations to MQTT broker(s). Th
 
 LinkSmart maven repo:
 
-```
+```xml
   <repository>
     <id>linksmart</id>
     <url>https://nexus.linksmart.eu/repository/public/</url>
   </repository>
 ```
 Maven dependency:
-```
+```xml
   <dependency>
     <groupId>eu.linksmart.commons</groupId>
     <artifactId>utils</artifactId>
