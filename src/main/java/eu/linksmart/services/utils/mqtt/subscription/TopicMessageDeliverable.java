@@ -74,7 +74,7 @@ public class TopicMessageDeliverable implements Runnable{
             // loggerService.debug(" Started the topic loop");
             try {
                 message = mqttMessages.take();
-                if(message.getSequence() != message.getQoS() && message.getQoS() != -255 ) { // this is not an end message
+                if(message.getSequence() != -255 && message.getQoS() != -255 ) { // this is not an end message
                     // loggerService.debug("Processing incoming message of topic "+ message.getTopic());
                     synchronized (this) {
                         for (MqttMessageObserver observer : observers)
