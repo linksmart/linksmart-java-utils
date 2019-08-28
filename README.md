@@ -1,5 +1,7 @@
-[![GitHub tag (latest release)](https://img.shields.io/github/tag/linksmart/linksmart-java-utils.svg?label=release)](https://github.com/linksmart/linksmart-java-utils/tags)
-[![Build Status](https://travis-ci.com/linksmart/linksmart-java-utils.svg?branch=master)](https://travis-ci.com/linksmart/linksmart-java-utils)
+[![GitHub tag (latest release)](https://img.shields.io/github/tag/linksmart/linksmart-java-utils.svg?label=release)](https://github.com/linksmart/linksmart-java-utils/tags) 
+
+**SNAPSHOT**  [![Build Status](https://travis-ci.com/linksmart/linksmart-java-utils.svg?branch=master)](https://travis-ci.com/linksmart/linksmart-java-utils) 
+**RELEASE**  [![Build Status](https://travis-ci.com/linksmart/linksmart-java-utils.svg?branch=release)](https://travis-ci.com/linksmart/linksmart-java-utils)
 
 
 LinkSmart Java Utility 
