@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -15,6 +16,7 @@ public class MqttMessage implements Serializable {
     private String topic = null;
     private byte[] payload = null;
     private int QoS = -1;
+    private Throwable errors;
 
     private boolean retained ;
     private long sequence ;
@@ -121,4 +123,16 @@ public class MqttMessage implements Serializable {
     }
 
 
+    public Throwable getErrors() {
+        return errors;
+    }
+
+    public void setErrors(Throwable errors) {
+        this.errors = errors;
+    }
+
+    @Override
+    public String toString() {
+        return new String(payload);
+    }
 }

@@ -274,7 +274,10 @@ public class Configurator extends CombinedConfiguration {
             return result;
     }
     public List<String> getStringList(String key) {
-        return Arrays.asList( getStringArray(key));
+        String [] aux = getStringArray(key);
+        if( aux != null)
+            return Arrays.asList( getStringArray(key));
+        return new ArrayList<>();
     }
     private <T>  T get(String key, Class<T> type){
         int i = mostRecentConf(key);

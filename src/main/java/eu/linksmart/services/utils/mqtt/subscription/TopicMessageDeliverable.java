@@ -20,22 +20,23 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class TopicMessageDeliverable implements Runnable{
     private LinkedBlockingQueue<MqttMessage> mqttMessages = new LinkedBlockingQueue<>();
-    private LinkedList<Observer> observers = new LinkedList<>();
+    private LinkedList<MqttMessageObserver> observers = new LinkedList<>();
     protected final String topic;
 
     //Start of code made for testing performance
     private final boolean VALIDATION_MODE;
     private final Deserializer deserializer;
     private final MessageValidator validator;
+    private final Thread thread;
     //End of code made for testing performance
 
     protected transient Logger loggerService = LogManager.getLogger(TopicMessageDeliverable.class);
     public TopicMessageDeliverable(String topic) {
+        this.topic=topic;
         // loggerService.debug("Starting new ");
-        Thread thread =new Thread(this);
+        thread =new Thread(this);
         thread.start();
 
-        this.topic=topic;
 
         /// Code for validation and test proposes
         if(VALIDATION_MODE = Configurator.getDefaultConfig().containsKeyAnywhere(Const.VALIDATION_DELIVERER)) {
@@ -54,7 +55,7 @@ public class TopicMessageDeliverable implements Runnable{
 
     private boolean activeTopic = true;
 
-    public synchronized void addObserver(Observer observer){
+    public synchronized void addObserver(MqttMessageObserver observer){
         if(!observers.contains(observer))
             observers.add(observer);
         else
@@ -73,10 +74,12 @@ public class TopicMessageDeliverable implements Runnable{
             // loggerService.debug(" Started the topic loop");
             try {
                 message = mqttMessages.take();
-                // loggerService.debug("Processing incoming message of topic "+ message.getTopic());
-                synchronized (this) {
-                    for (Observer observer : observers)
-                        observer.update(null, message);
+                if(message.getSequence() != message.getQoS() && message.getQoS() != -255 ) { // this is not an end message
+                    // loggerService.debug("Processing incoming message of topic "+ message.getTopic());
+                    synchronized (this) {
+                        for (MqttMessageObserver observer : observers)
+                            observer.update(message);
+                    }
                 }
 
             } catch (Exception e) {
@@ -96,7 +99,7 @@ public class TopicMessageDeliverable implements Runnable{
         }
     }
 
-    public synchronized void deleteObserver(Observer listener) {
+    public synchronized void deleteObserver(MqttMessageObserver listener) {
         observers.remove(listener);
     }
 
@@ -122,8 +125,20 @@ public class TopicMessageDeliverable implements Runnable{
 
     }
 
-    public boolean containsListener(Observer listener) {
+    public boolean containsListener(MqttMessageObserver listener) {
 
         return observers.contains(listener);
+    }
+
+    synchronized void destroy(){
+        activeTopic = false;
+        try{
+            MqttMessage endMessage = new MqttMessage();
+            endMessage.setQoS(-255);
+            endMessage.setSequence(-255);
+            mqttMessages.put(endMessage);
+        }catch (Exception e){
+
+        }
     }
 }

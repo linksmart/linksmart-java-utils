@@ -1,6 +1,7 @@
 package eu.linksmart.services.utils.mqtt.broker;
 
 import eu.linksmart.services.utils.mqtt.subscription.MqttMessageObserver;
+import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.util.Observable;
@@ -10,7 +11,7 @@ import java.util.regex.Pattern;
 /**
  * Created by José Ángel Carvajal on 23.10.2015 a researcher of Fraunhofer FIT.
  */
-public interface Broker extends Observer{
+public interface Broker extends MqttMessageObserver{
 
     Pattern ipPattern = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+"), urlPattern = Pattern.compile("\\b(tcp|ws|ssl)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|][:[0-9]+]?");
 
@@ -43,27 +44,25 @@ public interface Broker extends Observer{
     void setBrokerPort(String brokerPort) throws Exception ;
     void setBroker(String brokerName, String brokerPort) throws Exception;
 
-    boolean addListener(String topic, Observer stakeholder);
-    boolean addListener(String topic, Observer stakeholder, int QoS);
 
-    void addConnectionListener(Observer listener);
+    void addConnectionListener(MqttMessageObserver listener);
 
     default boolean addListener(String topic, MqttMessageObserver stakeholder){
-      return addListener(topic,(Observer)stakeholder);
+      return addListener(topic,stakeholder);
     }
 
     default boolean addListener(String topic, MqttMessageObserver stakeholder, int QoS){
-        return addListener(topic,(Observer)stakeholder,QoS);
+        return addListener(topic,stakeholder,QoS);
     }
 
-    boolean removeListener(String topic, Observer stakeholder);
-    void removeListener( Observer stakeholder);
+    void removeListener( MqttMessageObserver stakeholder);
+
+    boolean removeListener(String topic, MqttMessageObserver stakeholder);
     BrokerConfiguration getConfiguration();
 
     String getAlias();
 
-    @Override
-    void update(Observable o, Object arg) ;
+    void update(MqttMessage message) ;
 
     static String getBrokerURL(String brokerName, String brokerPort){
 

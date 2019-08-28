@@ -1,6 +1,8 @@
 package eu.linksmart.services.utils.mqtt.broker;
 
 import eu.linksmart.services.utils.configuration.Configurator;
+import eu.linksmart.services.utils.mqtt.subscription.MqttMessageObserver;
+import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import eu.linksmart.services.utils.mqtt.types.Topic;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
@@ -14,8 +16,8 @@ public class StaticBroker implements Broker{
 
     private StaticBrokerService brokerService;
     private UUID clientID;
-    private Map<Topic,ArrayList<Observer>> observersByTopic = new Hashtable<>();
-    private Map<Observer,Topic> observers = new Hashtable<>();
+    private Map<Topic,ArrayList<MqttMessageObserver>> observersByTopic = new Hashtable<>();
+    private Map<MqttMessageObserver,Topic> observers = new Hashtable<>();
     private boolean needsReconnect = false;
     private Configurator conf = Configurator.getDefaultConfig();
 
@@ -45,8 +47,8 @@ public class StaticBroker implements Broker{
         brokerService.connect(clientID);
     }
     private void disconnectClients(){
-        for(ArrayList<Observer> array: observersByTopic.values())
-            for(Observer observer: array)
+        for(ArrayList<MqttMessageObserver> array: observersByTopic.values())
+            for(MqttMessageObserver observer: array)
                 brokerService.removeListener(observer);
         needsReconnect = true;
 
@@ -54,7 +56,7 @@ public class StaticBroker implements Broker{
     private void reconnectClients(){
         if(needsReconnect)
             for(Topic key: observersByTopic.keySet())
-                for(Observer observer: observersByTopic.get(key))
+                for(MqttMessageObserver observer: observersByTopic.get(key))
                     brokerService.addListener(key.getTopic(),observer);
         needsReconnect= false;
 
@@ -136,24 +138,24 @@ public class StaticBroker implements Broker{
     }
 
     @Override
-    public boolean addListener(String topic, Observer stakeholder) {
+    public boolean addListener(String topic, MqttMessageObserver stakeholder) {
         topicObserversManagement(topic,stakeholder);
 
         return brokerService.addListener(topic,stakeholder);
     }
     @Override
-    public boolean addListener(String topic, Observer stakeholder, int QoS) {
+    public boolean addListener(String topic, MqttMessageObserver stakeholder, int QoS) {
        topicObserversManagement(topic,stakeholder);
 
         return brokerService.addListener(topic,stakeholder,QoS);
     }
 
     @Override
-    public void addConnectionListener(Observer listener) {
+    public void addConnectionListener(MqttMessageObserver listener) {
         brokerService.addConnectionListener(listener);
     }
 
-    private void topicObserversManagement(String topic, Observer stakeholder){
+    private void topicObserversManagement(String topic, MqttMessageObserver stakeholder){
         Topic t = new Topic(topic);
         if(!observersByTopic.containsKey(t))
             observersByTopic.put(t,new ArrayList<>());
@@ -163,7 +165,7 @@ public class StaticBroker implements Broker{
         }
     }
     @Override
-    public boolean removeListener(String topic, Observer stakeholder) {
+    public boolean removeListener(String topic, MqttMessageObserver stakeholder) {
         observersByTopic.get(new Topic(topic)).remove(stakeholder);
         observers.remove(stakeholder);
 
@@ -171,7 +173,7 @@ public class StaticBroker implements Broker{
     }
 
     @Override
-    public void removeListener(Observer stakeholder) {
+    public void removeListener(MqttMessageObserver stakeholder) {
         Topic t = observers.get(stakeholder);
         observers.remove(stakeholder);
         observersByTopic.get(t).remove(stakeholder);
@@ -193,8 +195,8 @@ public class StaticBroker implements Broker{
     }
 
     @Override
-    public void update(Observable o, Object arg) {
-        brokerService.update(o,arg);
+    public void update( MqttMessage arg) {
+        brokerService.update(arg);
 
     }
     @Override

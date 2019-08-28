@@ -23,7 +23,7 @@ import java.util.*;
  */
 public  class ForwardingListener implements MqttCallback {
     private final UUID originProtocol;
-    private Observer  connectionListener = null;
+    private MqttMessageObserver  connectionListener = null;
     private static Logger LOG = LogManager.getLogger(BrokerService.class);
 
     private long sequence ;
@@ -43,7 +43,7 @@ public  class ForwardingListener implements MqttCallback {
     private final MessageValidator validator;
     //End of code made for testing performance
 
-    public ForwardingListener( Observer connectionListener, UUID originProtocol) {
+    public ForwardingListener( MqttMessageObserver connectionListener, UUID originProtocol) {
         this.originProtocol = originProtocol;
         this.connectionListener = connectionListener;
 
@@ -64,7 +64,7 @@ public  class ForwardingListener implements MqttCallback {
         observables = new Hashtable<>();
         observables.put(new Topic(listening), new TopicMessageDeliverable(listening));
     }
-    public void addObserver(String topic, Observer listener){
+    public void addObserver(String topic, MqttMessageObserver listener){
         Topic t = new Topic(topic);
         if(!observables.containsKey(t))
             observables.put(t, new TopicMessageDeliverable(topic));
@@ -93,13 +93,16 @@ public  class ForwardingListener implements MqttCallback {
     }
 
     @SuppressWarnings("SuspiciousMethodCalls")
-    public boolean removeObserver(String topic, Observer listener){
+    public synchronized boolean removeObserver(String topic, MqttMessageObserver listener){
         if(observables.containsKey(topic) && observables.get(topic).containsListener(listener))
             observables.get(topic).deleteObserver(listener);
         else
             return false;
-        if(observables.get(topic).countObservers()==0)
+        if(observables.get(topic).countObservers()==0) {
+            TopicMessageDeliverable deliverable = observables.get(topic);
             observables.remove(topic);
+            deliverable.destroy();
+        }
 
 
         synchronized (muxMessageDelivererSet) {
@@ -120,7 +123,9 @@ public  class ForwardingListener implements MqttCallback {
     @Override
     public void connectionLost(Throwable throwable) {
         LOG.warn("Connection lost: "+throwable.getMessage(),throwable);
-        connectionListener.update(null, this);
+        MqttMessage  message = new MqttMessage();
+        message.setErrors(throwable);
+        connectionListener.update(message);
 
     }
 

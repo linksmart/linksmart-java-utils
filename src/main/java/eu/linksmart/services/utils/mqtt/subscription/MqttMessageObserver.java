@@ -8,10 +8,6 @@ import java.util.Observer;
 /**
  * Created by José Ángel Carvajal on 02.12.2016 a researcher of Fraunhofer FIT.
  */
-public interface MqttMessageObserver extends Observer {
-    @Override
-    default void update(Observable o, Object arg){
-        update(((MqttMessage)arg).getTopic(),(MqttMessage)arg);
-    }
-    void update(String topic, MqttMessage message);
+public interface MqttMessageObserver {
+    void update( MqttMessage message);
 }

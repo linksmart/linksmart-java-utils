@@ -2,6 +2,8 @@ package eu.linksmart.services.utils.mqtt.broker;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.mqtt.subscription.ForwardingListener;
+import eu.linksmart.services.utils.mqtt.subscription.MqttMessageObserver;
+import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,13 +13,13 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class BrokerService implements Observer, Broker {
+public class BrokerService implements MqttMessageObserver, Broker {
     protected transient static Logger loggerService = LogManager.getLogger(BrokerService.class);
     // this is the MQTT client to broker in the local broker
     private transient Configurator conf = Configurator.getDefaultConfig();
     protected final transient MqttClient mqttClient;
     transient ForwardingListener listener;
-    private transient List<Observer> connectionListener = new ArrayList<>();
+    private transient List<MqttMessageObserver> connectionListener = new ArrayList<>();
 
     protected ArrayList<String> topics = new ArrayList<>();
     private ArrayList<Integer> qoss = new ArrayList<>();
@@ -55,7 +57,6 @@ public class BrokerService implements Observer, Broker {
     protected synchronized void _disconnect() throws Exception {
         loggerService.info("MQTT broker UUID:" + brokerConf.getId() + " Alias:" + brokerConf.getAlias() + " with configuration " + brokerConf.toString() + " is disconnecting...");
         try {
-
             mqttClient.disconnect();
         } catch (Exception e) {
             loggerService.error(e.getMessage(), e);
@@ -192,11 +193,11 @@ public class BrokerService implements Observer, Broker {
         }
     }
 
-    public boolean addListener(String topic, Observer stakeholder) {
+    public boolean addListener(String topic, MqttMessageObserver stakeholder) {
         return addListener(topic, stakeholder, brokerConf.getSubQoS());
     }
 
-    public synchronized boolean addListener(String topic, Observer stakeholder, int QoS) {
+    public synchronized boolean addListener(String topic, MqttMessageObserver stakeholder, int QoS) {
 
         try {
             _connect();
@@ -215,16 +216,16 @@ public class BrokerService implements Observer, Broker {
     }
 
     @Override
-    public void addConnectionListener(Observer listener) {
+    public void addConnectionListener(MqttMessageObserver listener) {
         connectionListener.add(listener);
     }
 
-    public synchronized boolean removeListener(String topic, Observer stakeholder) {
+    public synchronized boolean removeListener(String topic, MqttMessageObserver stakeholder) {
 
         return listener.removeObserver(topic, stakeholder);
     }
 
-    public synchronized void removeListener(Observer stakeholder) {
+    public synchronized void removeListener(MqttMessageObserver stakeholder) {
         for (String topic : topics) {
             listener.removeObserver(topic, stakeholder);
         }
@@ -243,7 +244,7 @@ public class BrokerService implements Observer, Broker {
     }
 
     @Override
-    public synchronized void update(Observable o, Object arg) {
+    public synchronized void update( MqttMessage arg) {
         boolean wait = false;
         do {
             try {
@@ -254,15 +255,15 @@ public class BrokerService implements Observer, Broker {
             }
         } while (!wait);
         loggerService.warn("Disconnection of the client with id: " + brokerConf.getId() + " and alias: " + brokerConf.getAlias() + " with conf: " + brokerConf.toString());
-        reconnectingLoop(o, arg);
-        resubscribingLoop(o, arg);
-        informingLoop(o, arg);
+        reconnectingLoop( arg);
+        resubscribingLoop( arg);
+        informingLoop(arg);
 
         if (!isConnected())
             System.exit(-1);
     }
 
-    private void reconnectingLoop(Observable o, Object arg) {
+    private void reconnectingLoop(MqttMessage arg) {
         boolean fail = true;
         for (int i = 0; i < brokerConf.getNoTries() && !mqttClient.isConnected(); i++) {
             try {
@@ -285,7 +286,7 @@ public class BrokerService implements Observer, Broker {
         }
     }
 
-    private void resubscribingLoop(Observable o, Object arg) {
+    private void resubscribingLoop(MqttMessage arg) {
         boolean fail = !mqttClient.isConnected();
         for (int i = 0; !mqttClient.isConnected() && i < brokerConf.getNoTries(); i++) {
             try {
@@ -313,16 +314,16 @@ public class BrokerService implements Observer, Broker {
         }
     }
 
-    private void informingLoop(Observable o, Object arg) {
+    private void informingLoop(MqttMessage arg) {
         boolean fail = true;
         for (int i = 0; i < brokerConf.getNoTries() && mqttClient.isConnected(); i++) {
             try {
                 subscribeAll();
                 loggerService.info("Informing...");
                 if (connectionListener.size() > 1)
-                    connectionListener.stream().parallel().forEach(l -> l.update(null, arg));
+                    connectionListener.stream().parallel().forEach(l -> l.update( arg));
                 else
-                    connectionListener.forEach(l -> l.update(null, arg));
+                    connectionListener.forEach(l -> l.update(arg));
                 fail = false;
             } catch (Exception e) {
                 try {
@@ -343,6 +344,7 @@ public class BrokerService implements Observer, Broker {
     public String getAlias() {
         return brokerConf.getAlias();
     }
+
 
     @Override
     public boolean equals(Object o) {
