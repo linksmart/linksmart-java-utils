@@ -20,7 +20,7 @@ public class SerializerTest {
     private static final byte[] simpleBinTest = simpleStrTest.getBytes();
     @Test
     public void serializerTest(){
-        CI.ciCollapseMark("SerializerTest_serializerTest");
+        CI.ciCollapseMark("serializerTest");
 
         Map mapS, mapB;
         String serialized;
@@ -49,7 +49,7 @@ public class SerializerTest {
         serializer.close();
         deserializer.close();
 
-        CI.ciCollapseMark("SerializerTest_serializerTest");
+        CI.ciCollapseMark("serializerTest");
     }
     private void runTests(Map map){
 
@@ -62,7 +62,7 @@ public class SerializerTest {
     @Test
     public void JWSSerializationTest() {
 
-        CI.ciCollapseMark("SerializerTest_JWSSerializationTest");
+        CI.ciCollapseMark("JWSSerializationTest");
         try {
 
             Map<String,String> original = new Hashtable<>(), parsed;
@@ -84,6 +84,6 @@ public class SerializerTest {
             fail();
         }
 
-        CI.ciCollapseMark("SerializerTest_JWSSerializationTest");
+        CI.ciCollapseMark("JWSSerializationTest");
     }
 }
