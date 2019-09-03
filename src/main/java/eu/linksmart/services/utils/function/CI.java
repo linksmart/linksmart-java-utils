@@ -1,4 +1,4 @@
-package eu.linksmart.test.services.utils.function;
+package eu.linksmart.services.utils.function;
 
 import java.util.HashSet;
 import java.util.Set;

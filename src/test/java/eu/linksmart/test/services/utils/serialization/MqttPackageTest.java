@@ -5,7 +5,7 @@ import eu.linksmart.services.utils.mqtt.subscription.MqttMessageObserver;
 import eu.linksmart.services.utils.mqtt.subscription.TopicMessageDeliverable;
 import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import eu.linksmart.services.utils.mqtt.types.Topic;
-import eu.linksmart.test.services.utils.function.CI;
+import eu.linksmart.services.utils.function.CI;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 

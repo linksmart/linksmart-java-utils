@@ -2,7 +2,7 @@ package eu.linksmart.test.services.utils.serialization;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.function.Utils;
-import eu.linksmart.test.services.utils.function.CI;
+import eu.linksmart.services.utils.function.CI;
 import org.junit.Test;
 
 import java.io.File;

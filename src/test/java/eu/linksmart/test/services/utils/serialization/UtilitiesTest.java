@@ -1,7 +1,7 @@
 package eu.linksmart.test.services.utils.serialization;
 
 import eu.linksmart.services.utils.function.Utils;
-import eu.linksmart.test.services.utils.function.CI;
+import eu.linksmart.services.utils.function.CI;
 import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
