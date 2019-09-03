@@ -1,4 +1,4 @@
-package eu.linksmart.test.services.utils.serialization;
+package eu.linksmart.test.services.utils.function;
 
 /**
  * Created by José Ángel Carvajal on 03.09.2019 a researcher of Fraunhofer FIT.
