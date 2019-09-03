@@ -20,7 +20,7 @@ public class UtilitiesTest {
 
     @Test
     public void functionsTest(){
-        CI.ciCollapseMark("UtilitiesTest:functionsTest");
+        CI.ciCollapseMark("UtilitiesTest_functionsTest");
 
         Pattern pattern = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+(-[A-Za-z]+)?");
 
@@ -49,6 +49,6 @@ public class UtilitiesTest {
             fail();
         }
 
-        CI.ciCollapseMark("UtilitiesTest:functionsTest");
+        CI.ciCollapseMark("UtilitiesTest_functionsTest");
     }
 }

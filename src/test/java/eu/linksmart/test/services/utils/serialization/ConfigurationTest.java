@@ -22,9 +22,9 @@ public class ConfigurationTest {
 
     @Test
     public void configurationJarResourceFileTest(){
-        CI.ciCollapseMark("ConfigurationTest:configurationJarResourceFileTest");
+        CI.ciCollapseMark("ConfigurationTest_configurationJarResourceFileTest");
         test(resourceConfFile1,resourceConfFile2,resourceConfFile1,resourceConfFile2);
-        CI.ciCollapseMark("ConfigurationTest:configurationJarResourceFileTest");
+        CI.ciCollapseMark("ConfigurationTest_configurationJarResourceFileTest");
 
     }
     private void createFiles(String resourceName,String fileName){
@@ -42,7 +42,7 @@ public class ConfigurationTest {
 
     @Test
     public void configurationFileSystemTest(){
-        CI.ciCollapseMark("ConfigurationTest:configurationFileSystemTest");
+        CI.ciCollapseMark("ConfigurationTest_configurationFileSystemTest");
         createFiles(resourceConfFile2,ConfFile2);
         createFiles(resourceConfFile1,ConfFile1);
 
@@ -52,7 +52,7 @@ public class ConfigurationTest {
         (new File(ConfFile1)).delete();
         (new File(ConfFile2)).delete();
 
-        CI.ciCollapseMark("ConfigurationTest:configurationFileSystemTest");
+        CI.ciCollapseMark("ConfigurationTest_configurationFileSystemTest");
     }
     private void test(String confFile1,String confFile2,String strCmp1, String strCmp2){
         Configurator configurator = new Configurator(confFile2);
