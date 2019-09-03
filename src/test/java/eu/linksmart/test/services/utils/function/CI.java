@@ -9,10 +9,12 @@ import java.util.Set;
 public abstract class CI {
     private static final Set<String> mark = new HashSet<>();
     public static void ciCollapseStartMark(String label){
-        System.out.println("travis_fold:start:"+label);
+        if (System.getenv().containsKey("CI"))
+            System.out.println("travis_fold:start:"+label);
     }
     public static void ciCollapseEndMark(String label){
-        System.out.println("travis_fold:end:"+label);
+        if (System.getenv().containsKey("CI"))
+            System.out.println("travis_fold:end:"+label);
     }
     public static void ciCollapseMark(String label){
         if (mark.contains(label)){
