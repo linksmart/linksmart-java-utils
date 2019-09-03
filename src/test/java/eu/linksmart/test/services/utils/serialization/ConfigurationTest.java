@@ -2,6 +2,7 @@ package eu.linksmart.test.services.utils.serialization;
 
 import eu.linksmart.services.utils.configuration.Configurator;
 import eu.linksmart.services.utils.function.Utils;
+import eu.linksmart.test.services.utils.function.CI;
 import org.junit.Test;
 
 import java.io.File;
@@ -21,7 +22,9 @@ public class ConfigurationTest {
 
     @Test
     public void configurationJarResourceFileTest(){
+        CI.ciCollapseMark("ConfigurationTest:configurationJarResourceFileTest");
         test(resourceConfFile1,resourceConfFile2,resourceConfFile1,resourceConfFile2);
+        CI.ciCollapseMark("ConfigurationTest:configurationJarResourceFileTest");
 
     }
     private void createFiles(String resourceName,String fileName){
@@ -39,6 +42,7 @@ public class ConfigurationTest {
 
     @Test
     public void configurationFileSystemTest(){
+        CI.ciCollapseMark("ConfigurationTest:configurationFileSystemTest");
         createFiles(resourceConfFile2,ConfFile2);
         createFiles(resourceConfFile1,ConfFile1);
 
@@ -47,6 +51,8 @@ public class ConfigurationTest {
 
         (new File(ConfFile1)).delete();
         (new File(ConfFile2)).delete();
+
+        CI.ciCollapseMark("ConfigurationTest:configurationFileSystemTest");
     }
     private void test(String confFile1,String confFile2,String strCmp1, String strCmp2){
         Configurator configurator = new Configurator(confFile2);

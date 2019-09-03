@@ -1,6 +1,7 @@
 package eu.linksmart.test.services.utils.serialization;
 
 import eu.linksmart.services.utils.function.Utils;
+import eu.linksmart.test.services.utils.function.CI;
 import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
@@ -19,6 +20,8 @@ public class UtilitiesTest {
 
     @Test
     public void functionsTest(){
+        CI.ciCollapseMark("UtilitiesTest:functionsTest");
+
         Pattern pattern = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+(-[A-Za-z]+)?");
 
         assertEquals(true,pattern.matcher(Utils.getVersion()).find());
@@ -46,6 +49,6 @@ public class UtilitiesTest {
             fail();
         }
 
-
+        CI.ciCollapseMark("UtilitiesTest:functionsTest");
     }
 }

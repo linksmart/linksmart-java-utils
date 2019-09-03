@@ -2,6 +2,7 @@ package eu.linksmart.test.services.utils.serialization;
 
 import eu.linksmart.services.utils.serialization.*;
 
+import eu.linksmart.test.services.utils.function.CI;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,6 +20,8 @@ public class SerializerTest {
     private static final byte[] simpleBinTest = simpleStrTest.getBytes();
     @Test
     public void serializerTest(){
+        CI.ciCollapseMark("SerializerTest:serializerTest");
+
         Map mapS, mapB;
         String serialized;
         Deserializer deserializer = new DefaultSerializerDeserializer();
@@ -46,7 +49,7 @@ public class SerializerTest {
         serializer.close();
         deserializer.close();
 
-
+        CI.ciCollapseMark("SerializerTest:serializerTest");
     }
     private void runTests(Map map){
 
@@ -58,6 +61,8 @@ public class SerializerTest {
     }
     @Test
     public void JWSSerializationTest() {
+
+        CI.ciCollapseMark("SerializerTest:JWSSerializationTest");
         try {
 
             Map<String,String> original = new Hashtable<>(), parsed;
@@ -79,6 +84,6 @@ public class SerializerTest {
             fail();
         }
 
-
+        CI.ciCollapseMark("SerializerTest:JWSSerializationTest");
     }
 }

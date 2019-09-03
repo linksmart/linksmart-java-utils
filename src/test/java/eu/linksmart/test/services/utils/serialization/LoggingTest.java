@@ -1,5 +1,6 @@
 package eu.linksmart.test.services.utils.serialization;
 
+import eu.linksmart.test.services.utils.function.CI;
 import org.junit.Test;
 
 import org.apache.logging.log4j.Logger;
@@ -11,7 +12,11 @@ import org.apache.logging.log4j.LogManager;
 public class LoggingTest {
     @Test
     public  void test(){
+
+        CI.ciCollapseMark("LoggingTest");
         main(new String[]{});
+
+        CI.ciCollapseMark("LoggingTest");
     }
     public static void main(String[] args){
 

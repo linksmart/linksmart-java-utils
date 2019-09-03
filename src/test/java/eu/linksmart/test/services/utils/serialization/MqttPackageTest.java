@@ -5,6 +5,7 @@ import eu.linksmart.services.utils.mqtt.subscription.MqttMessageObserver;
 import eu.linksmart.services.utils.mqtt.subscription.TopicMessageDeliverable;
 import eu.linksmart.services.utils.mqtt.types.MqttMessage;
 import eu.linksmart.services.utils.mqtt.types.Topic;
+import eu.linksmart.test.services.utils.function.CI;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 
@@ -22,6 +23,7 @@ public class MqttPackageTest {
     public static final byte[] message = "world".getBytes();
     @Test
     public void topicMessageDeliverableTest(){
+        CI.ciCollapseMark("MqttPackageTest:topicMessageDeliverableTest");
         TopicMessageDeliverable tmp = new TopicMessageDeliverable(topic);
 
         TestObserver testObserver = new TestObserver(topic);
@@ -47,9 +49,12 @@ public class MqttPackageTest {
         assertEquals(true,testObserver.received);
         tmp.deleteObserver(testObserver);
         assertEquals(0, tmp.countObservers());
+        CI.ciCollapseMark("MqttPackageTest:topicMessageDeliverableTest");
     }
     @Test
     public void forwardingListenerSimpleTest(){
+        CI.ciCollapseMark("MqttPackageTest:forwardingListenerSimpleTest");
+
         TestConnectionObserver connectionObserver = new TestConnectionObserver();
         ForwardingListener forwardingListener = new ForwardingListener(connectionObserver,UUID.randomUUID());
         connectionObserver.forwardingListener = forwardingListener;
@@ -92,6 +97,7 @@ public class MqttPackageTest {
         assertEquals(true, forwardingListener.getListeningTopics().isEmpty());
 
 
+        CI.ciCollapseMark("MqttPackageTest:forwardingListenerSimpleTest");
     }
     private void silentSleep(int sleepTime){
         try {
@@ -100,7 +106,8 @@ public class MqttPackageTest {
         e.printStackTrace();
     }}
     @Test
-    public void forwardingListenerHevyLoadTest(){
+    public void forwardingListenerHeavyLoadTest(){
+        CI.ciCollapseMark("MqttPackageTest:forwardingListenerHeavyLoadTest");
         TestConnectionObserver connectionObserver = new TestConnectionObserver();
         ForwardingListener forwardingListener = new ForwardingListener(connectionObserver,UUID.randomUUID());
         connectionObserver.forwardingListener = forwardingListener;
@@ -166,9 +173,11 @@ public class MqttPackageTest {
         assertEquals(true, forwardingListener.getListeningTopics().isEmpty());
 
 
+        CI.ciCollapseMark("MqttPackageTest:forwardingListenerHeavyLoadTest");
     }
     @Test
     public void topicTest(){
+        CI.ciCollapseMark("MqttPackageTest:topicTest");
         Topic ttopic1 = new Topic(topic),ttopic11 = new Topic(topic), ttopic2 = new Topic(topic2), wildTopic =new Topic("#") , wildTopic2= new Topic("+/"+topic), wildTopic3 =new Topic("/#") , wildTopic4= new Topic("/+/"+topic);
 
         assertEquals(true,ttopic1.equals(ttopic1));
@@ -189,6 +198,7 @@ public class MqttPackageTest {
         assertEquals(false,ttopic1.equals(ttopic2));
         assertEquals(false,ttopic1.equals(topic2));
 
+        CI.ciCollapseMark("MqttPackageTest:topicTest");
 
     }
 
