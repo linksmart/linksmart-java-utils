@@ -103,7 +103,7 @@
         <java.version>1.10</java.version>
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
         <maven.source.version>2.2.1</maven.source.version>
-        <nimbus.jose.jwt>7.7</nimbus.jose.jwt>
+        <nimbus.jose.jwt>7.9</nimbus.jose.jwt>
         <linksmart.major.version>2</linksmart.major.version>
         <linksmart.minor.version>2</linksmart.minor.version>
         <linksmart.patch.version>1</linksmart.patch.version>
